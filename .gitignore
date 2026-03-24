@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+apps/*/dist/
+packages/*/dist/
+*.tsbuildinfo
+
+# Local runtime/install output
+walkie-talkie.config.json
+.env
+.env.*
+!.env.example
+
+# Logs and coverage
+*.log
+coverage/
+
+# OS / editor noise
+.DS_Store
+.idea/
+.vscode/

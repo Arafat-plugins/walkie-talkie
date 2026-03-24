@@ -1,0 +1,13 @@
+{
+  "name": "@walkie-talkie/dashboard",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Walkie-Talkie rendered dashboard bootstrap",
+  "main": "dist/apps/dashboard/src/main.js",
+  "types": "dist/apps/dashboard/src/main.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  }
+}

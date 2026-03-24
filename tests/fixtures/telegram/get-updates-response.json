@@ -1,0 +1,33 @@
+{
+  "ok": true,
+  "result": [
+    {
+      "update_id": 501001,
+      "message": {
+        "message_id": 73,
+        "date": 1711010101,
+        "text": "check cursor on my server",
+        "chat": {
+          "id": 998877,
+          "type": "private"
+        },
+        "from": {
+          "id": 112233,
+          "is_bot": false,
+          "username": "arafat"
+        }
+      }
+    },
+    {
+      "update_id": 501002,
+      "callback_query": {
+        "id": "unsupported-callback",
+        "from": {
+          "id": 112233,
+          "is_bot": false,
+          "username": "arafat"
+        }
+      }
+    }
+  ]
+}

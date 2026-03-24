@@ -1,0 +1,11 @@
+{
+  "update_id": 501002,
+  "callback_query": {
+    "id": "unsupported-callback",
+    "from": {
+      "id": 112233,
+      "is_bot": false,
+      "username": "arafat"
+    }
+  }
+}

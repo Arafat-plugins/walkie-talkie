@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://walkie-talkie.local/schema/config",
+  "title": "Walkie-Talkie Config",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "project",
+    "runtime",
+    "providers",
+    "bootstrap"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1"
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "primaryTrigger"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "primaryTrigger": {
+          "type": "string",
+          "enum": ["cli", "telegram"]
+        }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "environment"
+      ],
+      "properties": {
+        "environment": {
+          "type": "string",
+          "enum": ["local", "server"]
+        },
+        "logLevel": {
+          "type": "string",
+          "enum": ["info", "warning", "error", "debug"],
+          "default": "info"
+        },
+        "telegram": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "delivery": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["mode"],
+              "properties": {
+                "mode": {
+                  "type": "string",
+                  "enum": ["webhook", "polling"]
+                },
+                "webhookPath": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "pollingIntervalMs": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              }
+            },
+            "publicBaseUrl": {
+              "type": "string",
+              "minLength": 1
+            },
+            "webhookSecretToken": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "flowBindings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["triggerKind", "pipelineId"],
+            "properties": {
+              "triggerKind": {
+                "type": "string",
+                "enum": ["cli", "schedule", "telegram", "webhook", "dashboard"]
+              },
+              "eventName": {
+                "type": "string",
+                "minLength": 1
+              },
+              "pipelineId": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "providers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "defaultAi"
+      ],
+      "properties": {
+        "defaultAi": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "apiKey"
+          ],
+          "properties": {
+            "apiKey": {
+              "type": "string",
+              "minLength": 1
+            },
+            "baseUrl": {
+              "type": "string",
+              "minLength": 1
+            },
+            "model": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "telegram": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "botToken": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "bootstrap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "createExamplePipeline"
+      ],
+      "properties": {
+        "createExamplePipeline": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}
