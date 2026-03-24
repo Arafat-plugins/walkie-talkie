@@ -20,7 +20,18 @@ export function createTelegramRuntimeConfig(
   return {
     enabled: input?.enabled ?? true,
     delivery,
-    publicBaseUrl: input?.publicBaseUrl,
+    publicBaseUrl: input?.publicBaseUrl?.replace(/\/+$/, ""),
     webhookSecretToken: input?.webhookSecretToken
   };
+}
+
+export function buildTelegramRuntimeWebhookUrl(config: TelegramRuntimeConfig): string | undefined {
+  if (config.delivery.mode !== "webhook" || !config.publicBaseUrl) {
+    return undefined;
+  }
+
+  const webhookPath = config.delivery.webhookPath ?? "/telegram/webhook";
+  const normalizedPath = webhookPath.startsWith("/") ? webhookPath : `/${webhookPath}`;
+
+  return `${config.publicBaseUrl}${normalizedPath}`;
 }

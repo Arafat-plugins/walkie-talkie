@@ -1,6 +1,6 @@
 import type { TelegramOutgoingMessage } from "./telegram-adapter.ts";
 
-export const TELEGRAM_BOT_API_METHODS = ["getUpdates", "sendMessage"] as const;
+export const TELEGRAM_BOT_API_METHODS = ["getUpdates", "sendMessage", "setWebhook"] as const;
 
 export type TelegramBotApiMethod = (typeof TELEGRAM_BOT_API_METHODS)[number];
 
@@ -28,6 +28,20 @@ export type TelegramDeliveredMessage = {
   text?: string;
 };
 
+export type TelegramSetWebhookRequest = {
+  url: string;
+  secretToken?: string;
+  allowedUpdates?: string[];
+  dropPendingUpdates?: boolean;
+};
+
+export type TelegramWebhookRegistration = {
+  url: string;
+  secretTokenEnabled: boolean;
+  allowedUpdates: string[];
+  dropPendingUpdates: boolean;
+};
+
 export type TelegramBotApiError = {
   method: TelegramBotApiMethod;
   code: "transport" | "response";
@@ -46,6 +60,7 @@ export type TelegramBotApiClient = {
   config: TelegramBotApiConfig;
   getUpdates(request?: TelegramGetUpdatesRequest): Promise<unknown[]>;
   sendMessage(message: TelegramOutgoingMessage): Promise<TelegramDeliveredMessage>;
+  setWebhook(request: TelegramSetWebhookRequest): Promise<TelegramWebhookRegistration>;
 };
 
 function createTelegramBotApiError(input: TelegramBotApiError): TelegramBotApiError {
@@ -91,6 +106,21 @@ export function buildTelegramSendMessagePayload(
     text: message.text,
     ...(message.replyToMessageId !== undefined
       ? { reply_to_message_id: message.replyToMessageId }
+      : {})
+  };
+}
+
+export function buildTelegramSetWebhookPayload(
+  request: TelegramSetWebhookRequest
+): Record<string, unknown> {
+  return {
+    url: request.url,
+    ...(request.secretToken !== undefined ? { secret_token: request.secretToken } : {}),
+    ...(request.allowedUpdates !== undefined
+      ? { allowed_updates: [...request.allowedUpdates] }
+      : {}),
+    ...(request.dropPendingUpdates !== undefined
+      ? { drop_pending_updates: request.dropPendingUpdates }
       : {})
   };
 }
@@ -142,6 +172,29 @@ export function mapTelegramSendMessageResponse(
     messageId: result.message_id,
     chatId: result.chat.id,
     text: typeof result.text === "string" ? result.text : undefined
+  };
+}
+
+export function mapTelegramSetWebhookResponse(
+  raw: TelegramBotApiEnvelope<unknown>,
+  request: TelegramSetWebhookRequest
+): TelegramWebhookRegistration {
+  if (raw.ok !== true || raw.result !== true) {
+    throw new TelegramBotApiFailure(
+      createTelegramBotApiError({
+        method: "setWebhook",
+        code: "response",
+        message: raw.description ?? "Telegram setWebhook response did not confirm registration.",
+        cause: raw
+      })
+    );
+  }
+
+  return {
+    url: request.url,
+    secretTokenEnabled: request.secretToken !== undefined,
+    allowedUpdates: [...(request.allowedUpdates ?? [])],
+    dropPendingUpdates: request.dropPendingUpdates ?? false
   };
 }
 
@@ -200,6 +253,33 @@ export function createTelegramBotApiClient(input: {
             method: "sendMessage",
             code: "transport",
             message: "Telegram sendMessage transport request failed.",
+            cause: error
+          })
+        );
+      }
+    },
+    async setWebhook(request) {
+      const payload = buildTelegramSetWebhookPayload(request);
+
+      try {
+        const raw = await input.transport({
+          config: { ...input.config },
+          method: "setWebhook",
+          url: buildTelegramBotApiUrl(input.config, "setWebhook"),
+          payload
+        });
+
+        return mapTelegramSetWebhookResponse(raw, request);
+      } catch (error) {
+        if (error instanceof TelegramBotApiFailure) {
+          throw error;
+        }
+
+        throw new TelegramBotApiFailure(
+          createTelegramBotApiError({
+            method: "setWebhook",
+            code: "transport",
+            message: "Telegram setWebhook transport request failed.",
             cause: error
           })
         );

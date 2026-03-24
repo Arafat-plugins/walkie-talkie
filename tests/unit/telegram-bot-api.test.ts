@@ -5,6 +5,7 @@ import {
   TelegramBotApiFailure,
   buildTelegramBotApiUrl,
   buildTelegramGetUpdatesPayload,
+  buildTelegramSetWebhookPayload,
   buildTelegramSendMessagePayload,
   createTelegramBotApiClient
 } from "../../packages/integrations/src/index.ts";
@@ -20,7 +21,7 @@ test("buildTelegramBotApiUrl creates default Telegram API method URL", () => {
   assert.equal(url, "https://api.telegram.org/bot123:abc/getUpdates");
 });
 
-test("buildTelegramGetUpdatesPayload and buildTelegramSendMessagePayload normalize request fields", () => {
+test("buildTelegramGetUpdatesPayload, buildTelegramSendMessagePayload, and buildTelegramSetWebhookPayload normalize request fields", () => {
   const getUpdatesPayload = buildTelegramGetUpdatesPayload({
     offset: 10,
     limit: 25,
@@ -31,6 +32,12 @@ test("buildTelegramGetUpdatesPayload and buildTelegramSendMessagePayload normali
     chatId: 7788,
     text: "Walkie-Talkie ready.",
     replyToMessageId: 55
+  });
+  const setWebhookPayload = buildTelegramSetWebhookPayload({
+    url: "https://walkie-talkie.example.com/telegram/live",
+    secretToken: "telegram-secret",
+    allowedUpdates: ["message"],
+    dropPendingUpdates: true
   });
 
   assert.deepEqual(getUpdatesPayload, {
@@ -44,9 +51,15 @@ test("buildTelegramGetUpdatesPayload and buildTelegramSendMessagePayload normali
     text: "Walkie-Talkie ready.",
     reply_to_message_id: 55
   });
+  assert.deepEqual(setWebhookPayload, {
+    url: "https://walkie-talkie.example.com/telegram/live",
+    secret_token: "telegram-secret",
+    allowed_updates: ["message"],
+    drop_pending_updates: true
+  });
 });
 
-test("createTelegramBotApiClient delegates getUpdates and sendMessage through transport", async () => {
+test("createTelegramBotApiClient delegates getUpdates, sendMessage, and setWebhook through transport", async () => {
   const transportCalls: Array<{ method: string; url: string; payload: Record<string, unknown> }> = [];
   const client = createTelegramBotApiClient({
     config: {
@@ -63,6 +76,13 @@ test("createTelegramBotApiClient delegates getUpdates and sendMessage through tr
               update_id: 1000
             }
           ]
+        };
+      }
+
+      if (method === "setWebhook") {
+        return {
+          ok: true,
+          result: true
         };
       }
 
@@ -86,12 +106,22 @@ test("createTelegramBotApiClient delegates getUpdates and sendMessage through tr
     chatId: 7788,
     text: "Walkie-Talkie ready."
   });
+  const webhook = await client.setWebhook({
+    url: "https://walkie-talkie.example.com/telegram/live",
+    secretToken: "telegram-secret"
+  });
 
   assert.deepEqual(updates, [{ update_id: 1000 }]);
   assert.deepEqual(delivered, {
     messageId: 998,
     chatId: 7788,
     text: "Walkie-Talkie ready."
+  });
+  assert.deepEqual(webhook, {
+    url: "https://walkie-talkie.example.com/telegram/live",
+    secretTokenEnabled: true,
+    allowedUpdates: [],
+    dropPendingUpdates: false
   });
   assert.deepEqual(transportCalls, [
     {
@@ -107,6 +137,14 @@ test("createTelegramBotApiClient delegates getUpdates and sendMessage through tr
       payload: {
         chat_id: 7788,
         text: "Walkie-Talkie ready."
+      }
+    },
+    {
+      method: "setWebhook",
+      url: "https://api.telegram.org/bot123:abc/setWebhook",
+      payload: {
+        url: "https://walkie-talkie.example.com/telegram/live",
+        secret_token: "telegram-secret"
       }
     }
   ]);

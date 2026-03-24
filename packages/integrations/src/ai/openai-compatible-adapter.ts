@@ -6,6 +6,12 @@ import {
   type AiProvider,
   type AiProviderConfig
 } from "./provider-contract.ts";
+import {
+  createFailureReport,
+  createRetryPolicy,
+  shouldRetryFailure,
+  type RetryPolicy
+} from "../../../logging/src/index.ts";
 
 export type OpenAiCompatiblePayload = {
   model: string;
@@ -28,6 +34,8 @@ export type OpenAiCompatibleTransport = (input: {
   provider: AiProviderConfig;
   payload: OpenAiCompatiblePayload;
 }) => Promise<OpenAiCompatibleRawResponse>;
+
+type DelayHandler = (delayMs: number) => Promise<void>;
 
 function createAiProviderError(input: AiProviderError): AiProviderError {
   return {
@@ -114,10 +122,72 @@ export async function withProviderTimeout<T>(
   }
 }
 
+function toRetryableFailureReport(input: {
+  providerId: string;
+  error: AiProviderFailure;
+}) {
+  return createFailureReport({
+    source: "provider",
+    code: input.error.details.code,
+    message: input.error.details.message,
+    retryable: input.error.details.code === "transport" || input.error.details.code === "timeout",
+    context: {
+      providerId: input.providerId,
+      scope: "ai-provider"
+    },
+    now: () => new Date().toISOString()
+  });
+}
+
+async function defaultDelayHandler(delayMs: number): Promise<void> {
+  await new Promise<void>((resolve) => {
+    setTimeout(resolve, delayMs);
+  });
+}
+
+export async function withProviderRetry<T>(input: {
+  execute: () => Promise<T>;
+  providerId: string;
+  retryPolicy?: Partial<RetryPolicy>;
+  onDelay?: DelayHandler;
+}): Promise<T> {
+  const policy = createRetryPolicy(input.retryPolicy);
+  let attempt = 1;
+
+  for (;;) {
+    try {
+      return await input.execute();
+    } catch (error) {
+      if (!(error instanceof AiProviderFailure)) {
+        throw error;
+      }
+
+      const failure = toRetryableFailureReport({
+        providerId: input.providerId,
+        error
+      });
+      const decision = shouldRetryFailure({
+        attempt,
+        failure,
+        policy
+      });
+
+      if (!decision.shouldRetry) {
+        throw error;
+      }
+
+      attempt += 1;
+      await (input.onDelay ?? defaultDelayHandler)(decision.delayMs ?? 0);
+    }
+  }
+}
+
 export function createOpenAiCompatibleProvider(input: {
   config: AiProviderConfig;
   transport: OpenAiCompatibleTransport;
   timeoutMs?: number;
+  retryPolicy?: Partial<RetryPolicy>;
+  onDelay?: DelayHandler;
 }): AiProvider {
   return {
     config: { ...input.config },
@@ -129,29 +199,36 @@ export function createOpenAiCompatibleProvider(input: {
       const payload = buildOpenAiCompatiblePayload(normalized);
       let raw: OpenAiCompatibleRawResponse;
 
-      try {
-        raw = await withProviderTimeout(
-          input.transport({
-            provider: { ...input.config },
-            payload
-          }),
-          input.timeoutMs ?? 30_000,
-          input.config.id
-        );
-      } catch (error) {
-        if (error instanceof AiProviderFailure) {
-          throw error;
-        }
+      raw = await withProviderRetry({
+        providerId: input.config.id,
+        retryPolicy: input.retryPolicy,
+        onDelay: input.onDelay,
+        execute: async () => {
+          try {
+            return await withProviderTimeout(
+              input.transport({
+                provider: { ...input.config },
+                payload
+              }),
+              input.timeoutMs ?? 30_000,
+              input.config.id
+            );
+          } catch (error) {
+            if (error instanceof AiProviderFailure) {
+              throw error;
+            }
 
-        throw new AiProviderFailure(
-          createAiProviderError({
-            providerId: input.config.id,
-            code: "transport",
-            message: "Provider transport request failed.",
-            cause: error
-          })
-        );
-      }
+            throw new AiProviderFailure(
+              createAiProviderError({
+                providerId: input.config.id,
+                code: "transport",
+                message: "Provider transport request failed.",
+                cause: error
+              })
+            );
+          }
+        }
+      });
 
       return mapOpenAiCompatibleResponse(normalized, raw);
     }

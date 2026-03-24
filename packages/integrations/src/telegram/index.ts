@@ -5,3 +5,4 @@ export * from "./telegram-runtime-config.ts";
 export * from "./telegram-adapter.ts";
 export * from "./telegram-trigger.ts";
 export * from "./telegram-webhook-handler.ts";
+export * from "./telegram-webhook-server.ts";

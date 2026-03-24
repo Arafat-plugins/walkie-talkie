@@ -17,9 +17,9 @@ All implementation must follow this file milestone-by-milestone.
 
 - Project: Walkie-Talkie
 - Mode: Milestone-based incremental delivery
-- Current Milestone: `M17`
-- Current Step: `M17-S3`
-- Last Completed Milestone: `M16`
+- Current Milestone: `M18`
+- Current Step: `M18-S3`
+- Last Completed Milestone: `M17`
 
 ## Milestone Map
 
@@ -237,14 +237,14 @@ Done Criteria:
 
 ### M17: Real AI HTTP Transport
 
-Status: `IN PROGRESS`
+Status: `DONE`
 
 Steps:
 - [x] M17-S1 Define live HTTP transport contract for AI providers. work files: `packages/integrations/src/ai/http-transport.ts`, `packages/integrations/src/ai/index.ts`, `tests/unit/ai-http-transport.test.ts`, `docs/milestones/76-m17-s1-ai-http-transport-contract.md`
 - [x] M17-S2 Implement fetch-based OpenAI-compatible transport. work files: `packages/integrations/src/ai/http-transport.ts`, `packages/integrations/src/ai/openai-compatible-http-transport.ts`, `packages/integrations/src/ai/index.ts`, `tests/unit/openai-compatible-http-transport.test.ts`, `docs/milestones/77-m17-s2-openai-fetch-transport.md`
-- M17-S3 Load provider secrets/config into runtime provider wiring.
-- M17-S4 Add transport-level retry/timeout integration using reliability contracts.
-- M17-S5 Add live adapter smoke tests with mocked HTTP fixtures.
+- [x] M17-S3 Load provider secrets/config into runtime provider wiring. work files: `packages/runtime/src/provider-wiring.ts`, `packages/runtime/src/index.ts`, `tests/unit/runtime-ai-provider.test.ts`, `docs/milestones/78-m17-s3-runtime-ai-provider-wiring.md`
+- [x] M17-S4 Add transport-level retry/timeout integration using reliability contracts. work files: `packages/integrations/src/ai/openai-compatible-adapter.ts`, `tests/unit/openai-compatible-adapter.test.ts`, `docs/milestones/79-m17-s4-ai-retry-timeout-integration.md`
+- [x] M17-S5 Add live adapter smoke tests with mocked HTTP fixtures. work files: `tests/integration/ai-live-http-transport-smoke.test.ts`, `docs/milestones/80-m17-s5-ai-live-http-smoke.md`
 
 Done Criteria:
 - provider adapter can execute real HTTP calls
@@ -256,8 +256,8 @@ Done Criteria:
 Status: `PENDING`
 
 Steps:
-- M18-S1 Define storage contracts for entities, runs, and audit data.
-- M18-S2 Implement file-based persistence for agents/skills/pipelines.
+- [x] M18-S1 Define storage contracts for entities, runs, and audit data. work files: `packages/shared/src/storage-contract.ts`, `packages/shared/src/index.ts`, `tests/unit/storage-contract.test.ts`, `docs/milestones/81-m18-s1-storage-contracts.md`
+- [x] M18-S2 Implement file-based persistence for agents/skills/pipelines. work files: `packages/shared/src/entity-file-storage.ts`, `packages/shared/src/index.ts`, `.gitignore`, `tests/unit/entity-file-storage.test.ts`, `docs/milestones/83-m18-s2-entity-file-persistence.md`
 - M18-S3 Persist run history and audit events.
 - M18-S4 Add config/runtime state loading from persistent storage.
 - M18-S5 Add persistence integration tests.
@@ -302,6 +302,27 @@ Done Criteria:
 - long-running/background execution shape is defined
 - operational safety controls have clear contracts
 - release checklist exists for next delivery stage
+
+### M21: One-Line Installer and Distribution
+
+Status: `PENDING`
+
+Purpose Note:
+- User wants GitHub-hosted one-line install support similar to `curl ... | bash`, without overloading the base install flow.
+
+Steps:
+- M21-S1 Define hosted installer contract and release assumptions.
+- M21-S2 Add `scripts/install.sh` for Linux/macOS bootstrap.
+- M21-S3 Add Windows installer boundary (`install.ps1` or equivalent plan).
+- M21-S4 Add global CLI install/link strategy for release builds.
+- M21-S5 Add installer smoke docs, safety notes, and rollback/update guidance.
+
+Done Criteria:
+- hosted one-line installer path is documented
+- Linux/macOS bootstrap script exists
+- Windows installer path is defined
+- release build install flow is clear and testable
+- installer safety/rollback rules are documented
 
 ## Done Log
 
@@ -383,11 +404,18 @@ Done Criteria:
 - 2026-03-24: M16-S5 completed (fixture-driven smoke coverage added for live Telegram polling/send transport path; M16 done). work files: `tests/fixtures/telegram/get-updates-response.json`, `tests/fixtures/telegram/send-message-response.json`, `tests/integration/telegram-live-transport-smoke.test.ts`, `docs/milestones/75-m16-s5-telegram-live-transport-smoke.md`
 - 2026-03-24: M17-S1 completed (shared AI HTTP request/response transport contract added for provider adapters). work files: `packages/integrations/src/ai/http-transport.ts`, `packages/integrations/src/ai/index.ts`, `tests/unit/ai-http-transport.test.ts`, `docs/milestones/76-m17-s1-ai-http-transport-contract.md`
 - 2026-03-24: M17-S2 completed (fetch-based OpenAI-compatible transport added on top of shared AI HTTP request contract). work files: `packages/integrations/src/ai/http-transport.ts`, `packages/integrations/src/ai/openai-compatible-http-transport.ts`, `packages/integrations/src/ai/index.ts`, `tests/unit/openai-compatible-http-transport.test.ts`, `docs/milestones/77-m17-s2-openai-fetch-transport.md`
+- 2026-03-24: M17-S3 completed (runtime now resolves default AI provider config, model, and callable provider binding from saved config). work files: `packages/runtime/src/provider-wiring.ts`, `packages/runtime/src/index.ts`, `tests/unit/runtime-ai-provider.test.ts`, `docs/milestones/78-m17-s3-runtime-ai-provider-wiring.md`
+- 2026-03-24: M17-S4 completed (AI adapter now composes shared timeout and retry contracts, retrying only retryable transport/timeout failures). work files: `packages/integrations/src/ai/openai-compatible-adapter.ts`, `tests/unit/openai-compatible-adapter.test.ts`, `docs/milestones/79-m17-s4-ai-retry-timeout-integration.md`
+- 2026-03-24: M17-S5 completed (live AI fetch transport now has integration smoke coverage across runtime wiring and retry recovery; M17 done). work files: `tests/integration/ai-live-http-transport-smoke.test.ts`, `docs/milestones/80-m17-s5-ai-live-http-smoke.md`
+- 2026-03-24: M18-S1 completed (shared storage contracts added for entities, run history, and audit data). work files: `packages/shared/src/storage-contract.ts`, `packages/shared/src/index.ts`, `tests/unit/storage-contract.test.ts`, `docs/milestones/81-m18-s1-storage-contracts.md`
+- 2026-03-24: Telegram webhook runtime patch added (local HTTP webhook server boundary + auto setWebhook registration helper). work files: `packages/integrations/src/telegram/telegram-runtime-config.ts`, `packages/integrations/src/telegram/telegram-bot-api.ts`, `packages/integrations/src/telegram/telegram-webhook-server.ts`, `tests/unit/telegram-webhook-server.test.ts`, `docs/milestones/82-telegram-webhook-runtime-patch.md`
+- 2026-03-24: M18-S2 completed (file-based entity persistence added for agents, skills, MCP servers, and pipelines). work files: `packages/shared/src/entity-file-storage.ts`, `packages/shared/src/index.ts`, `.gitignore`, `tests/unit/entity-file-storage.test.ts`, `docs/milestones/83-m18-s2-entity-file-persistence.md`
+- 2026-03-24: Added future milestone M21 for GitHub-hosted one-line installer and release distribution planning.
 
 ## Current Next Tiny Step
 
 Execute only this now:
-- `M17-S3` Load provider secrets/config into runtime provider wiring.
+- `M18-S3` Persist run history and audit events.
 
 ## Resume Instruction (Use This Prompt)
 

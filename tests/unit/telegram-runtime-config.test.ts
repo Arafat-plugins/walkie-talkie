@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { createTelegramRuntimeConfig } from "../../packages/integrations/src/index.ts";
+import {
+  buildTelegramRuntimeWebhookUrl,
+  createTelegramRuntimeConfig
+} from "../../packages/integrations/src/index.ts";
 
 test("createTelegramRuntimeConfig applies polling defaults for live mode", () => {
   const config = createTelegramRuntimeConfig();
@@ -37,4 +40,18 @@ test("createTelegramRuntimeConfig keeps webhook-specific settings", () => {
     publicBaseUrl: "https://walkie-talkie.local",
     webhookSecretToken: "secret"
   });
+  assert.equal(buildTelegramRuntimeWebhookUrl(config), "https://walkie-talkie.local/telegram/live");
+});
+
+test("buildTelegramRuntimeWebhookUrl returns undefined when webhook url cannot be resolved", () => {
+  assert.equal(
+    buildTelegramRuntimeWebhookUrl(
+      createTelegramRuntimeConfig({
+        delivery: {
+          mode: "polling"
+        }
+      })
+    ),
+    undefined
+  );
 });

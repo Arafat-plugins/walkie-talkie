@@ -9,6 +9,7 @@ packages/*/dist/
 
 # Local runtime/install output
 walkie-talkie.config.json
+.walkie-talkie/
 .env
 .env.*
 !.env.example

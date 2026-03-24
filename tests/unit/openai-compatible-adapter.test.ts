@@ -6,6 +6,7 @@ import {
   buildOpenAiCompatiblePayload,
   createOpenAiCompatibleProvider,
   mapOpenAiCompatibleResponse,
+  withProviderRetry,
   withProviderTimeout
 } from "../../packages/integrations/src/index.ts";
 
@@ -220,4 +221,79 @@ test("createOpenAiCompatibleProvider normalizes transport failures", async () =>
       return true;
     }
   );
+});
+
+test("withProviderRetry retries retryable provider failures and eventually succeeds", async () => {
+  const delays: number[] = [];
+  let attempts = 0;
+
+  const result = await withProviderRetry({
+    providerId: "primary-openai",
+    retryPolicy: {
+      maxAttempts: 3,
+      baseDelayMs: 25,
+      retryableSources: ["provider"],
+      retryableCodes: ["transport"]
+    },
+    onDelay: async (delayMs) => {
+      delays.push(delayMs);
+    },
+    execute: async () => {
+      attempts += 1;
+
+      if (attempts < 2) {
+        throw new AiProviderFailure({
+          providerId: "primary-openai",
+          code: "transport",
+          message: "Temporary upstream socket issue."
+        });
+      }
+
+      return "success";
+    }
+  });
+
+  assert.equal(result, "success");
+  assert.equal(attempts, 2);
+  assert.deepEqual(delays, [25]);
+});
+
+test("createOpenAiCompatibleProvider does not retry non-retryable response failures", async () => {
+  let attempts = 0;
+  const provider = createOpenAiCompatibleProvider({
+    config: {
+      id: "primary-openai",
+      kind: "openai-compatible"
+    },
+    transport: async () => {
+      attempts += 1;
+      return {
+        choices: []
+      };
+    },
+    retryPolicy: {
+      maxAttempts: 3,
+      baseDelayMs: 10
+    },
+    onDelay: async () => {}
+  });
+
+  await assert.rejects(
+    () =>
+      provider.complete({
+        provider: {
+          id: "ignored",
+          kind: "openai-compatible"
+        },
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: "Hello" }]
+      }),
+    (error: unknown) => {
+      assert.ok(error instanceof AiProviderFailure);
+      assert.equal(error.details.code, "response");
+      return true;
+    }
+  );
+
+  assert.equal(attempts, 1);
 });
