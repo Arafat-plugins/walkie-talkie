@@ -64,4 +64,24 @@ export class McpRegistryStore extends InMemoryMcpRegistry {
   get(serverId: string): McpServerDefinition | undefined {
     return this.read(serverId);
   }
+
+  seed(server: McpServerDefinition): void {
+    this.store(server);
+  }
+
+  contains(serverId: string): boolean {
+    return this.has(serverId);
+  }
+
+  count(): number {
+    return this.readAll().length;
+  }
+
+  snapshot(): McpServerDefinition[] {
+    return this.readAll();
+  }
+
+  snapshotById(serverId: string): McpServerDefinition | undefined {
+    return this.read(serverId);
+  }
 }

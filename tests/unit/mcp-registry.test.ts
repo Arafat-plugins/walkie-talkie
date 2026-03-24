@@ -45,3 +45,29 @@ test("McpRegistryStore blocks duplicate ids and returns cloned snapshots", () =>
   assert.deepEqual(freshRead?.connection.args, ["demo-mcp-server"]);
   assert.deepEqual(freshRead?.tags, ["demo"]);
 });
+
+test("McpRegistryStore seed/count/snapshot support restored server state", () => {
+  const registry = new McpRegistryStore();
+
+  registry.seed({
+    version: "1",
+    id: "restored-mcp",
+    name: "Restored MCP",
+    status: "active",
+    connection: {
+      transport: "stdio",
+      command: "node",
+      args: ["server.js"]
+    },
+    auth: {
+      type: "none"
+    },
+    capabilities: [],
+    tags: ["restored"]
+  });
+
+  assert.equal(registry.contains("restored-mcp"), true);
+  assert.equal(registry.count(), 1);
+  assert.equal(registry.snapshot()[0]?.id, "restored-mcp");
+  assert.equal(registry.snapshotById("restored-mcp")?.name, "Restored MCP");
+});

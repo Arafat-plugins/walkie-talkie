@@ -78,3 +78,26 @@ test("SkillRegistryStore rejects invalid skill interfaces", () => {
     /Skill id must be a non-empty string\./
   );
 });
+
+test("SkillRegistryStore seed/count/snapshot support restored skill state", () => {
+  const registry = new SkillRegistryStore();
+
+  registry.seed({
+    version: "1",
+    id: "restored-skill",
+    name: "Restored Skill",
+    status: "active",
+    executionMode: "sync",
+    parameters: [],
+    tags: ["restored"],
+    handler: async () => ({
+      ok: true,
+      output: "restored"
+    })
+  });
+
+  assert.equal(registry.contains("restored-skill"), true);
+  assert.equal(registry.count(), 1);
+  assert.equal(registry.snapshot()[0]?.id, "restored-skill");
+  assert.equal(registry.snapshotById("restored-skill")?.name, "Restored Skill");
+});

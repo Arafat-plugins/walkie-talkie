@@ -43,6 +43,15 @@ export type AuditEventStore = {
   list(filter?: AuditEventStoreFilter): AuditEvent[] | Promise<AuditEvent[]>;
 };
 
+function cloneAuditEvent(event: AuditEvent): AuditEvent {
+  return {
+    ...event,
+    actor: event.actor ? { ...event.actor } : undefined,
+    target: event.target ? { ...event.target } : undefined,
+    metadata: event.metadata ? { ...event.metadata } : undefined
+  };
+}
+
 export function createAuditEvent(input: {
   id: string;
   category: string;
@@ -92,4 +101,49 @@ export function createNoopAuditEventStore(): AuditEventStore {
       return [];
     }
   };
+}
+
+export class InMemoryAuditEventStore implements AuditEventStore {
+  private readonly events: AuditEvent[] = [];
+
+  append(event: AuditEvent): void {
+    this.events.push(cloneAuditEvent(event));
+  }
+
+  seed(event: AuditEvent): void {
+    this.append(event);
+  }
+
+  list(filter?: AuditEventStoreFilter): AuditEvent[] {
+    return this.events
+      .filter((event) => {
+        if (filter?.category && event.category !== filter.category) {
+          return false;
+        }
+
+        if (filter?.action && event.action !== filter.action) {
+          return false;
+        }
+
+        if (filter?.outcome && event.outcome !== filter.outcome) {
+          return false;
+        }
+
+        if (filter?.targetId && event.target?.id !== filter.targetId) {
+          return false;
+        }
+
+        return true;
+      })
+      .map((event) => cloneAuditEvent(event));
+  }
+
+  latest(): AuditEvent | undefined {
+    const latestEvent = this.events.at(-1);
+    return latestEvent ? cloneAuditEvent(latestEvent) : undefined;
+  }
+
+  count(): number {
+    return this.events.length;
+  }
 }

@@ -28,6 +28,10 @@ export class InMemoryRunHistoryStore {
     this.entries.push(cloneRunHistoryEntry(entry));
   }
 
+  seed(entry: RuntimeRunHistoryEntry): void {
+    this.record(entry);
+  }
+
   list(): RuntimeRunHistoryEntry[] {
     return this.entries.map((entry) => cloneRunHistoryEntry(entry));
   }
@@ -35,6 +39,10 @@ export class InMemoryRunHistoryStore {
   latest(): RuntimeRunHistoryEntry | undefined {
     const latestEntry = this.entries.at(-1);
     return latestEntry ? cloneRunHistoryEntry(latestEntry) : undefined;
+  }
+
+  count(): number {
+    return this.entries.length;
   }
 }
 

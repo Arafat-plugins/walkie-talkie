@@ -17,9 +17,9 @@ All implementation must follow this file milestone-by-milestone.
 
 - Project: Walkie-Talkie
 - Mode: Milestone-based incremental delivery
-- Current Milestone: `M18`
-- Current Step: `M18-S3`
-- Last Completed Milestone: `M17`
+- Current Milestone: `M20`
+- Current Step: `M20-S2`
+- Last Completed Milestone: `M18`
 
 ## Milestone Map
 
@@ -253,14 +253,14 @@ Done Criteria:
 
 ### M18: Persistent Storage and State
 
-Status: `PENDING`
+Status: `DONE`
 
 Steps:
 - [x] M18-S1 Define storage contracts for entities, runs, and audit data. work files: `packages/shared/src/storage-contract.ts`, `packages/shared/src/index.ts`, `tests/unit/storage-contract.test.ts`, `docs/milestones/81-m18-s1-storage-contracts.md`
 - [x] M18-S2 Implement file-based persistence for agents/skills/pipelines. work files: `packages/shared/src/entity-file-storage.ts`, `packages/shared/src/index.ts`, `.gitignore`, `tests/unit/entity-file-storage.test.ts`, `docs/milestones/83-m18-s2-entity-file-persistence.md`
-- M18-S3 Persist run history and audit events.
-- M18-S4 Add config/runtime state loading from persistent storage.
-- M18-S5 Add persistence integration tests.
+- [x] M18-S3 Persist run history and audit events. work files: `packages/shared/src/runtime-file-storage.ts`, `packages/shared/src/index.ts`, `tests/unit/runtime-file-storage.test.ts`, `docs/milestones/84-m18-s3-runtime-file-persistence.md`
+- [x] M18-S4 Add config/runtime state loading from persistent storage. work files: `packages/runtime/src/persistent-state.ts`, `packages/runtime/src/index.ts`, `packages/logging/src/audit-event.ts`, `packages/runtime/src/run-history.ts`, `packages/skills/src/skill-registry.ts`, `packages/mcp/src/mcp-registry.ts`, `tests/unit/persistent-state.test.ts`, `tests/unit/audit-event.test.ts`, `tests/unit/skill-registry.test.ts`, `tests/unit/mcp-registry.test.ts`, `docs/milestones/85-m18-s4-persistent-state-loading.md`
+- [x] M18-S5 Add persistence integration tests. work files: `tests/integration/persistent-storage.integration.test.ts`, `docs/milestones/86-m18-s5-persistence-integration-tests.md`
 
 Done Criteria:
 - registries can be restored from disk-backed storage
@@ -291,7 +291,7 @@ Done Criteria:
 Status: `PENDING`
 
 Steps:
-- M20-S1 Add production install/bootstrap plan and installer script boundary.
+- [x] M20-S1 Add production install/bootstrap plan and installer script boundary. work files: `packages/core/src/production-bootstrap-plan.ts`, `packages/core/src/index.ts`, `scripts/install/production-bootstrap.ts`, `package.json`, `README.md`, `tests/unit/production-bootstrap-plan.test.ts`, `tests/integration/production-bootstrap-boundary.integration.test.ts`, `docs/milestones/87-m20-s1-production-bootstrap-boundary.md`
 - M20-S2 Add background worker/scheduler runtime contract.
 - M20-S3 Add secret management upgrade path and env loading policy.
 - M20-S4 Add operator safety controls (budgets, approvals, allowlists).
@@ -410,12 +410,16 @@ Done Criteria:
 - 2026-03-24: M18-S1 completed (shared storage contracts added for entities, run history, and audit data). work files: `packages/shared/src/storage-contract.ts`, `packages/shared/src/index.ts`, `tests/unit/storage-contract.test.ts`, `docs/milestones/81-m18-s1-storage-contracts.md`
 - 2026-03-24: Telegram webhook runtime patch added (local HTTP webhook server boundary + auto setWebhook registration helper). work files: `packages/integrations/src/telegram/telegram-runtime-config.ts`, `packages/integrations/src/telegram/telegram-bot-api.ts`, `packages/integrations/src/telegram/telegram-webhook-server.ts`, `tests/unit/telegram-webhook-server.test.ts`, `docs/milestones/82-telegram-webhook-runtime-patch.md`
 - 2026-03-24: M18-S2 completed (file-based entity persistence added for agents, skills, MCP servers, and pipelines). work files: `packages/shared/src/entity-file-storage.ts`, `packages/shared/src/index.ts`, `.gitignore`, `tests/unit/entity-file-storage.test.ts`, `docs/milestones/83-m18-s2-entity-file-persistence.md`
+- 2026-03-24: M18-S3 completed (file-based runtime persistence added for run history and audit events). work files: `packages/shared/src/runtime-file-storage.ts`, `packages/shared/src/index.ts`, `tests/unit/runtime-file-storage.test.ts`, `docs/milestones/84-m18-s3-runtime-file-persistence.md`
+- 2026-03-24: M18-S4 completed (persistent runtime bootstrap now restores config, entity state, run history, and audit data from disk-backed snapshots). work files: `packages/runtime/src/persistent-state.ts`, `packages/runtime/src/index.ts`, `packages/logging/src/audit-event.ts`, `packages/runtime/src/run-history.ts`, `packages/skills/src/skill-registry.ts`, `packages/mcp/src/mcp-registry.ts`, `tests/unit/persistent-state.test.ts`, `tests/unit/audit-event.test.ts`, `tests/unit/skill-registry.test.ts`, `tests/unit/mcp-registry.test.ts`, `docs/milestones/85-m18-s4-persistent-state-loading.md`
+- 2026-03-24: M18-S5 completed (save-and-restore persistence path now has integration coverage across config, entity state, run history, and audit data; M18 done). work files: `tests/integration/persistent-storage.integration.test.ts`, `docs/milestones/86-m18-s5-persistence-integration-tests.md`
+- 2026-03-24: M20-S1 completed (production bootstrap plan and local installer boundary script added without overloading the supported local install flow). work files: `packages/core/src/production-bootstrap-plan.ts`, `packages/core/src/index.ts`, `scripts/install/production-bootstrap.ts`, `package.json`, `README.md`, `tests/unit/production-bootstrap-plan.test.ts`, `tests/integration/production-bootstrap-boundary.integration.test.ts`, `docs/milestones/87-m20-s1-production-bootstrap-boundary.md`
 - 2026-03-24: Added future milestone M21 for GitHub-hosted one-line installer and release distribution planning.
 
 ## Current Next Tiny Step
 
 Execute only this now:
-- `M18-S3` Persist run history and audit events.
+- `M20-S2` Add background worker/scheduler runtime contract.
 
 ## Resume Instruction (Use This Prompt)
 

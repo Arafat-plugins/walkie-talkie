@@ -62,4 +62,21 @@ From project root (`walkie-talkie/`):
    - `http://localhost:4173`
 
 The dashboard server serves `apps/dashboard/index.html` and the built browser entry from `apps/dashboard/dist/...`.
+
+## Production Bootstrap Boundary
+
+From project root (`walkie-talkie/`):
+
+1. Print the current production bootstrap plan:
+   - `npm run install:production:plan`
+2. Verify the boundary script is wired:
+   - `npm run install:production:check`
+
+Current scope:
+- documents the supported local entry command
+- defines hosted installer and Windows installer boundaries
+- keeps install flow minimal until later productization steps
+
+Today, the supported real install path is still:
+- `npm run install:local`
 # walkie-talkie

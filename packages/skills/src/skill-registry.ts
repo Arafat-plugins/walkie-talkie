@@ -63,4 +63,24 @@ export class SkillRegistryStore extends InMemorySkillRegistry {
   load(skillId: string): SkillHandler | undefined {
     return this.read(skillId)?.handler;
   }
+
+  seed(skill: SkillDefinition): void {
+    this.store(skill);
+  }
+
+  contains(skillId: string): boolean {
+    return this.has(skillId);
+  }
+
+  count(): number {
+    return this.readAll().length;
+  }
+
+  snapshot(): SkillDefinition[] {
+    return this.readAll();
+  }
+
+  snapshotById(skillId: string): SkillDefinition | undefined {
+    return this.read(skillId);
+  }
 }
