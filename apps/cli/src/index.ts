@@ -4,13 +4,14 @@ import { realpathSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 
 import { executeInstallCommand, type CommandResult } from "./commands/install.ts";
+import { executeTelegramPollOnceCommand } from "./commands/telegram-poll-once.ts";
 
 export type CliScaffoldMetadata = {
   appName: string;
   stage: string;
 };
 
-export type SupportedCommand = "install";
+export type SupportedCommand = "install" | "telegram:poll-once";
 
 type CommandHandler = () => Promise<CommandResult>;
 
@@ -19,7 +20,8 @@ type CommandHandler = () => Promise<CommandResult>;
  * This keeps command registration explicit and test-friendly.
  */
 const commandRegistry: Record<SupportedCommand, CommandHandler> = {
-  install: executeInstallCommand
+  install: executeInstallCommand,
+  "telegram:poll-once": executeTelegramPollOnceCommand
 };
 
 export function getCliScaffoldMetadata(): CliScaffoldMetadata {
@@ -34,7 +36,7 @@ export function getCliScaffoldMetadata(): CliScaffoldMetadata {
  */
 export function resolveCommand(argv: string[]): SupportedCommand | null {
   const candidate = argv[2];
-  if (candidate === "install") {
+  if (candidate === "install" || candidate === "telegram:poll-once") {
     return candidate;
   }
   return null;

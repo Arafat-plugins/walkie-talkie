@@ -17,6 +17,7 @@
     "dashboard:serve:check": "npm run dashboard:build && node apps/dashboard/scripts/serve.mjs --check",
     "dashboard:typecheck": "npm --workspace @walkie-talkie/dashboard run typecheck",
     "install:local": "npm run cli:link && walkie-talkie install",
+    "telegram:poll:once": "node --experimental-strip-types apps/cli/src/index.ts telegram:poll-once",
     "install:production:plan": "node --experimental-strip-types scripts/install/production-bootstrap.ts",
     "install:production:check": "node --experimental-strip-types scripts/install/production-bootstrap.ts --check",
     "install:hosted:plan": "node --experimental-strip-types scripts/install/hosted-installer-contract.ts",

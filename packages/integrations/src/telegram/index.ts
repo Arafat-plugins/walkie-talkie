@@ -1,5 +1,6 @@
 export * from "./telegram-delivery-mode.ts";
 export * from "./telegram-bot-api.ts";
+export * from "./telegram-bot-api-fetch.ts";
 export * from "./telegram-polling-runner.ts";
 export * from "./telegram-runtime-config.ts";
 export * from "./telegram-adapter.ts";

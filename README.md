@@ -63,6 +63,23 @@ From project root (`walkie-talkie/`):
 
 The dashboard server serves `apps/dashboard/index.html` and the built browser entry from `apps/dashboard/dist/...`.
 
+## Telegram Real Test (Poll Once)
+
+From project root (`walkie-talkie/`):
+
+1. make sure `walkie-talkie.config.json` has:
+   - `runtime.telegram.enabled = true`
+   - `runtime.telegram.delivery.mode = polling`
+   - `providers.telegram.botToken`
+2. run one live polling cycle:
+   - `npm run telegram:poll:once`
+
+Current scope:
+- fetches one real Telegram `getUpdates` cycle
+- routes supported updates into runtime orchestration
+- persists updated run history to local runtime storage
+- does not yet auto-send Telegram replies from final pipeline output
+
 ## Production Bootstrap Boundary
 
 From project root (`walkie-talkie/`):

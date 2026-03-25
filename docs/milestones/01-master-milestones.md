@@ -324,6 +324,27 @@ Done Criteria:
 - release build install flow is clear and testable
 - installer safety/rollback rules are documented
 
+### M22: Interactive Dashboard Builder
+
+Status: `PENDING`
+
+Purpose Note:
+- User wants dashboard-driven pipeline building where agents and skills can be added visually through drag-and-drop instead of only code-first editing.
+
+Steps:
+- M22-S1 Define dashboard builder state contract for canvas nodes, edges, selection, and unsaved edits.
+- M22-S2 Add draggable palette for agents, skills, MCP servers, and response nodes.
+- M22-S3 Add canvas drop zones with node placement and move interactions.
+- M22-S4 Add edge connect/remove interactions between workflow nodes.
+- M22-S5 Save/load edited pipeline state back into persistent storage and add builder smoke tests.
+
+Done Criteria:
+- dashboard has an interactive builder surface
+- agents and skills can be dragged onto a workflow canvas
+- node relationships can be created and removed visually
+- edited pipeline state can be saved and restored
+- builder flow has smoke coverage
+
 ## Done Log
 
 - 2026-03-13: M1 completed (structure + architecture docs).
