@@ -46,6 +46,19 @@ export function validateConfig(config: unknown): ConfigValidationResult {
     if (config.project.primaryTrigger !== "cli" && config.project.primaryTrigger !== "telegram") {
       pushIssue(issues, "project.primaryTrigger", 'Primary trigger must be "cli" or "telegram".');
     }
+
+    if (
+      config.project.preferredChannel !== undefined &&
+      config.project.preferredChannel !== "telegram" &&
+      config.project.preferredChannel !== "whatsapp" &&
+      config.project.preferredChannel !== "discord"
+    ) {
+      pushIssue(
+        issues,
+        "project.preferredChannel",
+        'Preferred channel must be "telegram", "whatsapp", or "discord".'
+      );
+    }
   }
 
   if (!isRecord(config.runtime)) {
@@ -63,6 +76,21 @@ export function validateConfig(config: unknown): ConfigValidationResult {
       config.runtime.logLevel !== "debug"
     ) {
       pushIssue(issues, "runtime.logLevel", "Runtime logLevel is invalid.");
+    }
+
+    if (config.runtime.access !== undefined) {
+      if (!isRecord(config.runtime.access)) {
+        pushIssue(issues, "runtime.access", "Runtime access config must be an object.");
+      } else if (
+        config.runtime.access.fullMachineAccess !== undefined &&
+        typeof config.runtime.access.fullMachineAccess !== "boolean"
+      ) {
+        pushIssue(
+          issues,
+          "runtime.access.fullMachineAccess",
+          "Runtime access fullMachineAccess must be a boolean."
+        );
+      }
     }
 
     if (config.runtime.telegram !== undefined) {
@@ -211,7 +239,10 @@ export function validateConfig(config: unknown): ConfigValidationResult {
   } else if (!isRecord(config.providers.defaultAi)) {
     pushIssue(issues, "providers.defaultAi", "Default AI provider is required.");
   } else {
-    if (!isNonEmptyString(config.providers.defaultAi.apiKey)) {
+    if (
+      config.providers.defaultAi.apiKey !== undefined &&
+      !isNonEmptyString(config.providers.defaultAi.apiKey)
+    ) {
       pushIssue(issues, "providers.defaultAi.apiKey", "Default AI apiKey must be a non-empty string.");
     }
 
@@ -228,6 +259,29 @@ export function validateConfig(config: unknown): ConfigValidationResult {
     ) {
       pushIssue(issues, "providers.defaultAi.model", "Default AI model must be a non-empty string.");
     }
+
+    if (
+      config.providers.defaultAi.authMode !== undefined &&
+      config.providers.defaultAi.authMode !== "api-key" &&
+      config.providers.defaultAi.authMode !== "codex"
+    ) {
+      pushIssue(
+        issues,
+        "providers.defaultAi.authMode",
+        'Default AI authMode must be "api-key" or "codex".'
+      );
+    }
+
+    if (
+      config.providers.defaultAi.authMode !== "codex" &&
+      !isNonEmptyString(config.providers.defaultAi.apiKey)
+    ) {
+      pushIssue(
+        issues,
+        "providers.defaultAi.apiKey",
+        "Default AI apiKey must be a non-empty string when authMode is api-key."
+      );
+    }
   }
 
   if (
@@ -238,6 +292,34 @@ export function validateConfig(config: unknown): ConfigValidationResult {
         !isNonEmptyString(config.providers.telegram.botToken)))
   ) {
     pushIssue(issues, "providers.telegram.botToken", "Telegram botToken must be a non-empty string.");
+  }
+
+  if (
+    isRecord(config.providers) &&
+    config.providers.whatsapp !== undefined &&
+    (!isRecord(config.providers.whatsapp) ||
+      (config.providers.whatsapp.accessToken !== undefined &&
+        !isNonEmptyString(config.providers.whatsapp.accessToken)))
+  ) {
+    pushIssue(
+      issues,
+      "providers.whatsapp.accessToken",
+      "WhatsApp accessToken must be a non-empty string."
+    );
+  }
+
+  if (
+    isRecord(config.providers) &&
+    config.providers.discord !== undefined &&
+    (!isRecord(config.providers.discord) ||
+      (config.providers.discord.botToken !== undefined &&
+        !isNonEmptyString(config.providers.discord.botToken)))
+  ) {
+    pushIssue(
+      issues,
+      "providers.discord.botToken",
+      "Discord botToken must be a non-empty string."
+    );
   }
 
   if (!isRecord(config.bootstrap)) {

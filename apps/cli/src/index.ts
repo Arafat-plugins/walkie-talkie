@@ -4,6 +4,7 @@ import { realpathSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 
 import { executeInstallCommand, type CommandResult } from "./commands/install.ts";
+import { executeOnboardCommand } from "./commands/onboard.ts";
 import { executeTelegramPollLoopCommand } from "./commands/telegram-poll-loop.ts";
 import { executeTelegramPollOnceCommand } from "./commands/telegram-poll-once.ts";
 import { executeTelegramSeedLocalMachineCommand } from "./commands/telegram-seed-local-machine.ts";
@@ -13,7 +14,12 @@ export type CliScaffoldMetadata = {
   stage: string;
 };
 
-export type SupportedCommand = "install" | "telegram:poll-once" | "telegram:poll" | "telegram:seed-local-machine";
+export type SupportedCommand =
+  | "install"
+  | "onboard"
+  | "telegram:poll-once"
+  | "telegram:poll"
+  | "telegram:seed-local-machine";
 
 type CommandHandler = () => Promise<CommandResult>;
 
@@ -23,6 +29,7 @@ type CommandHandler = () => Promise<CommandResult>;
  */
 const commandRegistry: Record<SupportedCommand, CommandHandler> = {
   install: executeInstallCommand,
+  onboard: executeOnboardCommand,
   "telegram:poll-once": executeTelegramPollOnceCommand,
   "telegram:poll": executeTelegramPollLoopCommand,
   "telegram:seed-local-machine": executeTelegramSeedLocalMachineCommand
@@ -42,6 +49,7 @@ export function resolveCommand(argv: string[]): SupportedCommand | null {
   const candidate = argv[2];
   if (
     candidate === "install" ||
+    candidate === "onboard" ||
     candidate === "telegram:poll-once" ||
     candidate === "telegram:poll" ||
     candidate === "telegram:seed-local-machine"

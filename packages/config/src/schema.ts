@@ -3,10 +3,14 @@ export type WalkieTalkieConfig = {
   project: {
     name: string;
     primaryTrigger: "cli" | "telegram";
+    preferredChannel?: "telegram" | "whatsapp" | "discord";
   };
   runtime: {
     environment: "local" | "server";
     logLevel?: "info" | "warning" | "error" | "debug";
+    access?: {
+      fullMachineAccess?: boolean;
+    };
     telegram?: {
       enabled?: boolean;
       delivery?: {
@@ -25,11 +29,18 @@ export type WalkieTalkieConfig = {
   };
   providers: {
     defaultAi: {
-      apiKey: string;
+      apiKey?: string;
       baseUrl?: string;
       model?: string;
+      authMode?: "api-key" | "codex";
     };
     telegram?: {
+      botToken?: string;
+    };
+    whatsapp?: {
+      accessToken?: string;
+    };
+    discord?: {
       botToken?: string;
     };
   };

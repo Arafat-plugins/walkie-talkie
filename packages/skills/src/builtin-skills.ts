@@ -21,7 +21,18 @@ function createProviderBinding(
   config: WalkieTalkieConfig,
   env?: NodeJS.ProcessEnv | Record<string, string | undefined>,
   fetchImpl?: typeof fetch
-): RuntimeDefaultAiProviderBinding {
+): RuntimeDefaultAiProviderBinding | undefined {
+  if (config.providers.defaultAi.authMode === "codex") {
+    return undefined;
+  }
+
+  if (
+    typeof config.providers.defaultAi.apiKey !== "string" ||
+    config.providers.defaultAi.apiKey.trim().length === 0
+  ) {
+    return undefined;
+  }
+
   return createRuntimeDefaultAiProvider({
     config,
     env,
@@ -46,8 +57,8 @@ export function createBuiltinSkillById(input: {
   if (input.skillId === TELEGRAM_MACHINE_ASSISTANT_SKILL_ID) {
     const binding = createProviderBinding(input.config, input.env, input.fetchImpl);
     return createTelegramMachineAssistantSkill({
-      provider: binding.provider,
-      defaultModel: binding.defaultModel
+      provider: binding?.provider,
+      defaultModel: binding?.defaultModel
     });
   }
 

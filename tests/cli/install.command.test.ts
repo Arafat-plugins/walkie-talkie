@@ -23,6 +23,7 @@ test("walkie-talkie install returns exit code 0 with ready dependencies", async 
     assert.ok(logs.some((line) => line.includes("[info] npm is ready")));
     assert.ok(logs.some((line) => line.includes("Dependency bootstrap skipped via WALKIE_SKIP_BOOTSTRAP=1.")));
     assert.ok(logs.some((line) => line.includes("Onboarding skipped via WALKIE_SKIP_ONBOARDING=1.")));
+    assert.ok(logs.some((line) => line.includes("Next step: run `walkie-talkie onboard`")));
   } finally {
     console.log = originalLog;
     if (originalSkipBootstrap === undefined) {

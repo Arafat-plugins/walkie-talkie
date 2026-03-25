@@ -10,21 +10,36 @@ import {
 
 test("buildPromptLines renders deterministic question output", () => {
   const schema = getDefaultOnboardingQuestionSchema();
-  const lines = buildPromptLines(schema.questions[1]!);
+  const lines = buildPromptLines(schema.questions[7]!);
 
   assert.deepEqual(lines, [
-    "Primary trigger *",
-    "Choose the first interface that should trigger your workflow.",
-    "- cli: CLI",
+    "Communication channel *",
+    "Choose the first channel users will talk through. Telegram is live today; the others are saved for future connectors.",
     "- telegram: Telegram",
-    "> primaryTrigger [default: cli]"
+    "- whatsapp: WhatsApp",
+    "- discord: Discord",
+    "> communicationChannel [default: telegram]"
   ]);
 });
 
 test("runOnboardingPromptShell collects normalized answers in schema order", async () => {
   const schema = getDefaultOnboardingQuestionSchema();
   const writes: string[] = [];
-  const responses = ["demo-app", "", "sk-test-123", "no"];
+  const responses = [
+    "demo-app",
+    "yes",
+    "",
+    "",
+    "sk-test-123",
+    "no",
+    "",
+    "",
+    "123:telegram",
+    "",
+    "",
+    "",
+    "no"
+  ];
   let askCount = 0;
 
   const io: OnboardingPromptIO = {
@@ -44,8 +59,17 @@ test("runOnboardingPromptShell collects normalized answers in schema order", asy
   assert.equal(writes[0], "Project name *");
   assert.deepEqual(answers, {
     projectName: "demo-app",
-    primaryTrigger: "cli",
+    fullMachineAccess: true,
+    providerModel: "gpt-4o-mini",
+    aiAuthMode: "api-key",
     providerApiKey: "sk-test-123",
+    connectCodexNow: false,
+    runtimeEnvironment: "local",
+    communicationChannel: "telegram",
+    channelCredential: "123:telegram",
+    telegramDeliveryMode: "polling",
+    telegramPollingIntervalMs: "2000",
+    telegramPublicBaseUrl: "",
     confirmExamplePipeline: false
   });
 });

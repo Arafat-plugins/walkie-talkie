@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { test } from "node:test";
 
@@ -156,6 +156,35 @@ test("validateConfig accepts telegram runtime settings for polling mode", () => 
   assert.deepEqual(result.issues, []);
 });
 
+test("validateConfig accepts codex auth mode without direct api key", () => {
+  const result = validateConfig({
+    ...createValidConfig(),
+    project: {
+      name: "demo-app",
+      primaryTrigger: "cli",
+      preferredChannel: "discord"
+    },
+    runtime: {
+      environment: "local",
+      access: {
+        fullMachineAccess: true
+      }
+    },
+    providers: {
+      defaultAi: {
+        authMode: "codex",
+        model: "gpt-5"
+      },
+      discord: {
+        botToken: "discord-demo-token"
+      }
+    }
+  });
+
+  assert.equal(result.valid, true);
+  assert.deepEqual(result.issues, []);
+});
+
 test("validateConfig reports invalid telegram runtime settings", () => {
   const result = validateConfig({
     ...createValidConfig(),
@@ -250,7 +279,12 @@ test("parseAndValidateConfig returns validated config for valid json input", () 
 });
 
 test("config schema file remains valid json", () => {
-  const schemaPath = resolve("config/schema/walkie-talkie.config.schema.json");
+  const localSchemaPath = resolve(process.cwd(), "config/schema/walkie-talkie.config.schema.json");
+  const workspaceSchemaPath = resolve(
+    process.cwd(),
+    "walkie-talkie/config/schema/walkie-talkie.config.schema.json"
+  );
+  const schemaPath = existsSync(localSchemaPath) ? localSchemaPath : workspaceSchemaPath;
   const raw = readFileSync(schemaPath, "utf8");
 
   assert.doesNotThrow(() => JSON.parse(raw));

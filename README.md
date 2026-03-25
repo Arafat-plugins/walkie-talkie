@@ -40,15 +40,34 @@ From project root (`walkie-talkie/`):
 
 1. One-command local setup:
    - `npm run install:local`
-2. Or manual path:
+2. Optional rerun of terminal onboarding:
+   - `walkie-talkie onboard`
+   - or `npm run onboard`
+3. Or manual path:
    - `npm run cli:link`
    - `walkie-talkie install`
+   - `walkie-talkie onboard`
 
 `npm run install:local` will:
+- install workspace dependencies
 - link the `walkie-talkie` binary
 - run `walkie-talkie install`
 
-Linked `walkie-talkie install` now performs the CLI build automatically before executing the compiled entrypoint.
+`walkie-talkie install` now performs terminal onboarding after dependency/bootstrap work.
+
+Install/onboard terminal setup now captures:
+- project name
+- full machine access preference
+- default model
+- AI connection mode (`api-key` or `codex`)
+- API key when API-key mode is selected
+- optional Codex device-auth launch when Codex mode is selected
+- runtime environment
+- communication channel (`telegram`, `whatsapp`, `discord`)
+- selected channel credential
+- Telegram polling vs webhook mode when Telegram is selected
+- webhook public URL when needed
+- example pipeline bootstrap flag
 
 ## Dashboard Local Run
 
@@ -78,14 +97,16 @@ From project root (`walkie-talkie/`):
 
 From project root (`walkie-talkie/`):
 
-1. make sure config has:
+1. install and onboard:
+   - `npm run install:local`
+2. make sure config has:
    - `providers.telegram.botToken`
-   - `providers.defaultAi.apiKey`
-2. seed a ready-to-test Telegram agent + skill + pipeline:
+   - either `providers.defaultAi.apiKey` or `providers.defaultAi.authMode = codex`
+3. seed a ready-to-test Telegram agent + skill + pipeline:
    - `npm run telegram:seed:local-machine`
-3. run one real polling cycle:
+4. run one real polling cycle:
    - `npm run telegram:poll:once`
-4. or keep the bot running:
+5. or keep the bot running:
    - `npm run telegram:poll`
 
 Current scope:
@@ -97,7 +118,8 @@ Current scope:
 Seeded Telegram flow behavior:
 - understands simple machine questions like installed/version checks
 - checks the real local machine
-- uses the default AI provider to turn facts into a more natural reply
+- uses the default AI provider when available to turn facts into a more natural reply
+- falls back to deterministic human text when Codex mode is selected but no direct provider bridge is active yet
 
 ## Production Bootstrap Boundary
 

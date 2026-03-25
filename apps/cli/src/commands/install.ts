@@ -3,30 +3,13 @@ import {
   buildDependencyGuidance,
   type DependencyRequirement
 } from "../../../../packages/core/src/index.ts";
-import {
-  executeOnboardingFlow,
-  type OnboardingAnswers,
-  type OnboardingPromptIO
-} from "../../../../packages/onboarding/src/index.ts";
-import {
-  resolveConfigPath,
-  writeConfigFile,
-  type WalkieTalkieConfig
-} from "../../../../packages/config/src/index.ts";
-import {
-  bootstrapRuntime,
-  buildRuntimeBootstrapSummary
-} from "../../../../packages/runtime/src/index.ts";
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { promisify } from "node:util";
-import readline from "node:readline/promises";
-import { stdin as input, stdout as output } from "node:process";
+import { executeOnboardCommand, type CommandResult } from "./onboard.ts";
 
-export type CommandResult = {
-  exitCode: number;
-};
+export type { CommandResult } from "./onboard.ts";
 
 const INSTALL_REQUIREMENTS: DependencyRequirement[] = [
   { name: "node", minVersion: "20.0.0" },
@@ -37,55 +20,6 @@ const execFileAsync = promisify(execFile);
 
 const SKIP_BOOTSTRAP_ENV_KEY = "WALKIE_SKIP_BOOTSTRAP";
 const SKIP_ONBOARDING_ENV_KEY = "WALKIE_SKIP_ONBOARDING";
-
-function createTerminalPromptIO(): OnboardingPromptIO {
-  const rl = readline.createInterface({ input, output });
-
-  return {
-    writeLine(line) {
-      console.log(line);
-    },
-    async ask(prompt) {
-      return rl.question(prompt);
-    }
-  };
-}
-
-function getRequiredStringAnswer(answers: OnboardingAnswers, key: string): string {
-  const value = answers[key];
-  if (typeof value !== "string" || value.trim() === "") {
-    throw new Error(`Onboarding answer "${key}" is required.`);
-  }
-
-  return value.trim();
-}
-
-function getOptionalBooleanAnswer(answers: OnboardingAnswers, key: string, fallback: boolean): boolean {
-  const value = answers[key];
-  return typeof value === "boolean" ? value : fallback;
-}
-
-export function buildConfigFromOnboardingAnswers(answers: OnboardingAnswers): WalkieTalkieConfig {
-  return {
-    version: "1",
-    project: {
-      name: getRequiredStringAnswer(answers, "projectName"),
-      primaryTrigger: getRequiredStringAnswer(answers, "primaryTrigger") as "cli" | "telegram"
-    },
-    runtime: {
-      environment: "local",
-      logLevel: "info"
-    },
-    providers: {
-      defaultAi: {
-        apiKey: getRequiredStringAnswer(answers, "providerApiKey")
-      }
-    },
-    bootstrap: {
-      createExamplePipeline: getOptionalBooleanAnswer(answers, "confirmExamplePipeline", true)
-    }
-  };
-}
 
 async function runProjectBootstrap(): Promise<CommandResult> {
   const packageJsonPath = resolve(process.cwd(), "package.json");
@@ -106,40 +40,6 @@ async function runProjectBootstrap(): Promise<CommandResult> {
     console.log(typedError.message || "Unknown npm install failure.");
     return { exitCode: 1 };
   }
-}
-
-async function runOnboardingFlow(): Promise<CommandResult> {
-  const io = createTerminalPromptIO();
-  const result = await executeOnboardingFlow(io);
-
-  if (!result.ok) {
-    console.log("Onboarding validation failed:");
-    for (const issue of result.validation.issues) {
-      console.log(`- ${issue.message}`);
-    }
-    return { exitCode: 1 };
-  }
-
-  const config = buildConfigFromOnboardingAnswers(result.answers);
-  const configPath = resolveConfigPath(process.cwd());
-  await writeConfigFile(configPath, config);
-
-  console.log("Onboarding answers collected successfully.");
-  console.log(`- projectName: ${result.answers.projectName}`);
-  console.log(`- primaryTrigger: ${result.answers.primaryTrigger}`);
-  console.log(`- confirmExamplePipeline: ${String(result.answers.confirmExamplePipeline)}`);
-  console.log(`Config saved to: ${configPath}`);
-
-  const runtimeResult = await bootstrapRuntime(process.cwd());
-  for (const line of buildRuntimeBootstrapSummary(runtimeResult)) {
-    console.log(line);
-  }
-
-  if (!runtimeResult.ok) {
-    return { exitCode: 1 };
-  }
-
-  return { exitCode: 0 };
 }
 
 /**
@@ -164,14 +64,12 @@ export async function executeInstallCommand(): Promise<CommandResult> {
     console.log(`Dependency bootstrap skipped via ${SKIP_BOOTSTRAP_ENV_KEY}=1.`);
     if (process.env[SKIP_ONBOARDING_ENV_KEY] === "1") {
       console.log(`Onboarding skipped via ${SKIP_ONBOARDING_ENV_KEY}=1.`);
-      console.log("Dependencies are ready. Next step: onboarding setup (M4).");
+      console.log("Dependencies are ready.");
+      console.log("Next step: run `walkie-talkie onboard` to configure your project from the terminal.");
       return { exitCode: 0 };
     }
-
-    const onboardingResult = await runOnboardingFlow();
-    return onboardingResult.exitCode === 0
-      ? { exitCode: 0 }
-      : onboardingResult;
+    console.log("Dependencies are ready. Starting terminal onboarding...");
+    return executeOnboardCommand();
   }
 
   const bootstrapResult = await runProjectBootstrap();
@@ -181,8 +79,10 @@ export async function executeInstallCommand(): Promise<CommandResult> {
 
   if (process.env[SKIP_ONBOARDING_ENV_KEY] === "1") {
     console.log(`Onboarding skipped via ${SKIP_ONBOARDING_ENV_KEY}=1.`);
-    return { exitCode: 0 };
+  } else {
+    console.log("Dependency install complete. Starting terminal onboarding...");
+    return executeOnboardCommand();
   }
 
-  return runOnboardingFlow();
+  return { exitCode: 0 };
 }

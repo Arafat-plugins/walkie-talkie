@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { runCli } from "../../apps/cli/src/index.ts";
+import { resolveCommand, runCli } from "../../apps/cli/src/index.ts";
 
 test("runCli returns 1 for unsupported commands", async () => {
   const exitCode = await runCli(["node", "walkie-talkie", "unknown"]);
@@ -24,6 +24,7 @@ test("runCli install command prints dependency check header", async () => {
     const exitCode = await runCli(["node", "walkie-talkie", "install"]);
     assert.equal(exitCode, 0);
     assert.equal(logs[0], "Dependency check results:");
+    assert.ok(logs.some((line) => line.includes("Next step: run `walkie-talkie onboard`")));
   } finally {
     console.log = originalLog;
     if (originalSkipBootstrap === undefined) {
@@ -37,4 +38,8 @@ test("runCli install command prints dependency check header", async () => {
       process.env.WALKIE_SKIP_ONBOARDING = originalSkipOnboarding;
     }
   }
+});
+
+test("resolveCommand supports onboard command", () => {
+  assert.equal(resolveCommand(["node", "walkie-talkie", "onboard"]), "onboard");
 });

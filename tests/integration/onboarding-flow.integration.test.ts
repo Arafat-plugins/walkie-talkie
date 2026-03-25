@@ -7,7 +7,21 @@ import {
 } from "../../packages/onboarding/src/index.ts";
 
 test("executeOnboardingFlow succeeds with valid answers", async () => {
-  const responses = ["demo-app", "telegram", "sk-live", "yes"];
+  const responses = [
+    "demo-app",
+    "yes",
+    "gpt-4o-mini",
+    "api-key",
+    "sk-live",
+    "no",
+    "local",
+    "telegram",
+    "123:telegram",
+    "",
+    "",
+    "",
+    "yes"
+  ];
   let askCount = 0;
 
   const io: OnboardingPromptIO = {
@@ -27,12 +41,13 @@ test("executeOnboardingFlow succeeds with valid answers", async () => {
   }
 
   assert.equal(result.answers.projectName, "demo-app");
-  assert.equal(result.answers.primaryTrigger, "telegram");
+  assert.equal(result.answers.communicationChannel, "telegram");
+  assert.equal(result.answers.channelCredential, "123:telegram");
   assert.equal(result.answers.confirmExamplePipeline, true);
 });
 
 test("executeOnboardingFlow returns validation issues for invalid answers", async () => {
-  const responses = ["", "email", "", "yes"];
+  const responses = ["", "no", "", "oauth", "", "no", "", "email", "", "", "", "", "yes"];
   let askCount = 0;
 
   const io: OnboardingPromptIO = {
@@ -57,12 +72,16 @@ test("executeOnboardingFlow returns validation issues for invalid answers", asyn
       message: "Project name is required."
     },
     {
-      questionId: "primaryTrigger",
-      message: "Primary trigger must be one of: cli, telegram."
+      questionId: "aiAuthMode",
+      message: "AI connection mode must be one of: api-key, codex."
     },
     {
-      questionId: "providerApiKey",
-      message: "Provider API key is required."
+      questionId: "communicationChannel",
+      message: "Communication channel must be one of: telegram, whatsapp, discord."
+    },
+    {
+      questionId: "channelCredential",
+      message: "Channel credential is required."
     }
   ]);
 });

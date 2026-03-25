@@ -76,9 +76,64 @@ export function validateOnboardingAnswers(
     }
   }
 
+  const aiAuthMode = answers.aiAuthMode;
+  const providerApiKey = answers.providerApiKey;
+  const communicationChannel = answers.communicationChannel;
+  const channelCredential = answers.channelCredential;
+  const telegramDeliveryMode = answers.telegramDeliveryMode;
+  const telegramPublicBaseUrl = answers.telegramPublicBaseUrl;
+  const telegramPollingIntervalMs = answers.telegramPollingIntervalMs;
+  const runtimeEnvironment = answers.runtimeEnvironment;
+
+  if (
+    aiAuthMode === "api-key" &&
+    (providerApiKey === undefined || (typeof providerApiKey === "string" && providerApiKey.trim() === ""))
+  ) {
+    issues.push({
+      questionId: "providerApiKey",
+      message: "Provider API key is required when AI connection mode is api-key."
+    });
+  }
+
+  if (
+    communicationChannel === "telegram" &&
+    telegramDeliveryMode === "webhook" &&
+    (telegramPublicBaseUrl === undefined ||
+      (typeof telegramPublicBaseUrl === "string" && telegramPublicBaseUrl.trim() === ""))
+  ) {
+    issues.push({
+      questionId: "telegramPublicBaseUrl",
+      message: "Telegram public base URL is required when delivery mode is webhook."
+    });
+  }
+
+  if (
+    telegramPollingIntervalMs !== undefined &&
+    typeof telegramPollingIntervalMs === "string" &&
+    telegramPollingIntervalMs.trim() !== ""
+  ) {
+    const parsedInterval = Number(telegramPollingIntervalMs);
+    if (!Number.isInteger(parsedInterval) || parsedInterval <= 0) {
+      issues.push({
+        questionId: "telegramPollingIntervalMs",
+        message: "Telegram polling interval must be a positive integer."
+      });
+    }
+  }
+
+  if (
+    runtimeEnvironment !== undefined &&
+    runtimeEnvironment !== "local" &&
+    runtimeEnvironment !== "server"
+  ) {
+    issues.push({
+      questionId: "runtimeEnvironment",
+      message: "Runtime environment must be one of: local, server."
+    });
+  }
+
   return {
     valid: issues.length === 0,
     issues
   };
 }
-

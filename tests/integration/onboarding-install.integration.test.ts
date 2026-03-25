@@ -20,6 +20,7 @@ test("executeInstallCommand succeeds when bootstrap and onboarding are skipped",
     assert.equal(result.exitCode, 0);
     assert.ok(logs.some((line) => line.includes("Dependency check results:")));
     assert.ok(logs.some((line) => line.includes("Onboarding skipped via WALKIE_SKIP_ONBOARDING=1.")));
+    assert.ok(logs.some((line) => line.includes("Next step: run `walkie-talkie onboard`")));
   } finally {
     console.log = originalLog;
     if (originalSkipBootstrap === undefined) {

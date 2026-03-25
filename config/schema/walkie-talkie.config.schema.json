@@ -31,6 +31,10 @@
         "primaryTrigger": {
           "type": "string",
           "enum": ["cli", "telegram"]
+        },
+        "preferredChannel": {
+          "type": "string",
+          "enum": ["telegram", "whatsapp", "discord"]
         }
       }
     },
@@ -49,6 +53,15 @@
           "type": "string",
           "enum": ["info", "warning", "error", "debug"],
           "default": "info"
+        },
+        "access": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "fullMachineAccess": {
+              "type": "boolean"
+            }
+          }
         },
         "telegram": {
           "type": "object",
@@ -120,9 +133,6 @@
         "defaultAi": {
           "type": "object",
           "additionalProperties": false,
-          "required": [
-            "apiKey"
-          ],
           "properties": {
             "apiKey": {
               "type": "string",
@@ -135,10 +145,34 @@
             "model": {
               "type": "string",
               "minLength": 1
+            },
+            "authMode": {
+              "type": "string",
+              "enum": ["api-key", "codex"]
             }
           }
         },
         "telegram": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "botToken": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "whatsapp": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "accessToken": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "discord": {
           "type": "object",
           "additionalProperties": false,
           "properties": {

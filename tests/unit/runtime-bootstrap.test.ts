@@ -41,6 +41,21 @@ test("verifyRuntimeReadiness returns ready for CLI-trigger config", () => {
   assert.deepEqual(result.issues, []);
 });
 
+test("verifyRuntimeReadiness allows codex auth mode without direct api key", () => {
+  const result = verifyRuntimeReadiness({
+    ...createValidConfig(),
+    providers: {
+      defaultAi: {
+        authMode: "codex",
+        model: "gpt-5"
+      }
+    }
+  });
+
+  assert.equal(result.ready, true);
+  assert.deepEqual(result.issues, []);
+});
+
 test("verifyRuntimeReadiness requires telegram botToken for telegram trigger", () => {
   const result = verifyRuntimeReadiness({
     ...createValidConfig(),

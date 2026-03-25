@@ -22,12 +22,13 @@ function pushIssue(issues: RuntimeReadinessIssue[], path: string, message: strin
 export function verifyRuntimeReadiness(config: WalkieTalkieConfig): RuntimeReadinessResult {
   const issues: RuntimeReadinessIssue[] = [];
   const secretPresence = buildSecretPresenceSummary(config);
+  const aiAuthMode = config.providers.defaultAi.authMode ?? "api-key";
 
-  if (!secretPresence["providers.defaultAi.apiKey"]) {
+  if (aiAuthMode !== "codex" && !secretPresence["providers.defaultAi.apiKey"]) {
     pushIssue(
       issues,
       "providers.defaultAi.apiKey",
-      "Runtime requires a configured default AI apiKey."
+      "Runtime requires a configured default AI apiKey unless Codex auth mode is selected."
     );
   }
 

@@ -6,15 +6,24 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { test } from "node:test";
 
-import { buildConfigFromOnboardingAnswers } from "../../apps/cli/src/commands/install.ts";
+import { buildConfigFromOnboardingAnswers } from "../../apps/cli/src/commands/onboard.ts";
 import { writeConfigFile } from "../../packages/config/src/index.ts";
 import { bootstrapRuntime, buildRuntimeBootstrapSummary } from "../../packages/runtime/src/index.ts";
 
 test("buildConfigFromOnboardingAnswers maps onboarding answers to persisted config shape", () => {
   const config = buildConfigFromOnboardingAnswers({
     projectName: "my-walkie-talkie-app",
-    primaryTrigger: "cli",
+    fullMachineAccess: true,
+    providerModel: "gpt-4o-mini",
+    aiAuthMode: "api-key",
     providerApiKey: "sk-test-123",
+    connectCodexNow: false,
+    runtimeEnvironment: "local",
+    communicationChannel: "telegram",
+    channelCredential: "123:telegram",
+    telegramDeliveryMode: "polling",
+    telegramPollingIntervalMs: "2000",
+    telegramPublicBaseUrl: "",
     confirmExamplePipeline: true
   });
 
@@ -22,15 +31,31 @@ test("buildConfigFromOnboardingAnswers maps onboarding answers to persisted conf
     version: "1",
     project: {
       name: "my-walkie-talkie-app",
-      primaryTrigger: "cli"
+      primaryTrigger: "telegram",
+      preferredChannel: "telegram"
     },
     runtime: {
       environment: "local",
-      logLevel: "info"
+      logLevel: "info",
+      access: {
+        fullMachineAccess: true
+      },
+      telegram: {
+        enabled: true,
+        delivery: {
+          mode: "polling",
+          pollingIntervalMs: 2000
+        }
+      }
     },
     providers: {
       defaultAi: {
-        apiKey: "sk-test-123"
+        apiKey: "sk-test-123",
+        model: "gpt-4o-mini",
+        authMode: "api-key"
+      },
+      telegram: {
+        botToken: "123:telegram"
       }
     },
     bootstrap: {
@@ -49,8 +74,17 @@ test("persisted install config can be bootstrapped by runtime", async () => {
 
     const config = buildConfigFromOnboardingAnswers({
       projectName: "my-walkie-talkie-app",
-      primaryTrigger: "cli",
+      fullMachineAccess: true,
+      providerModel: "gpt-4o-mini",
+      aiAuthMode: "api-key",
       providerApiKey: "sk-test-123",
+      connectCodexNow: false,
+      runtimeEnvironment: "local",
+      communicationChannel: "telegram",
+      channelCredential: "123:telegram",
+      telegramDeliveryMode: "polling",
+      telegramPollingIntervalMs: "2000",
+      telegramPublicBaseUrl: "",
       confirmExamplePipeline: true
     });
 
