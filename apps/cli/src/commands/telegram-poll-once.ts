@@ -9,10 +9,12 @@ import {
   type TelegramBotApiClient
 } from "../../../../packages/integrations/src/index.ts";
 import { resolveRuntimeStoragePath, writeRuntimeStorageFile } from "../../../../packages/shared/src/index.ts";
+import { rebindBuiltinSkills } from "../../../../packages/skills/src/index.ts";
 
 type PersistentBootstrap = typeof bootstrapPersistentRuntime;
 type CommandResult = {
   exitCode: number;
+  nextOffset?: number;
 };
 
 export function buildTelegramPollOnceSummary(input: {
@@ -23,6 +25,7 @@ export function buildTelegramPollOnceSummary(input: {
   processedUpdates: number;
   ignoredUpdates: number;
   executedRuns: number;
+  deliveredReplies: number;
   successfulRuns: number;
   failedRuns: number;
   runtimeStoragePath?: string;
@@ -46,6 +49,7 @@ export function buildTelegramPollOnceSummary(input: {
   lines.push(`- processed updates: ${input.processedUpdates}`);
   lines.push(`- ignored updates: ${input.ignoredUpdates}`);
   lines.push(`- executed runs: ${input.executedRuns}`);
+  lines.push(`- delivered replies: ${input.deliveredReplies}`);
   lines.push(`- successful runs: ${input.successfulRuns}`);
   lines.push(`- failed runs: ${input.failedRuns}`);
 
@@ -62,6 +66,8 @@ export async function executeTelegramPollOnceCommand(input?: {
   bootstrap?: PersistentBootstrap;
   createClient?: (botToken: string) => TelegramBotApiClient;
   now?: () => string;
+  fetchImpl?: typeof fetch;
+  env?: NodeJS.ProcessEnv | Record<string, string | undefined>;
 }): Promise<CommandResult> {
   const baseDirectory = input?.baseDirectory ?? process.cwd();
   const bootstrap = input?.bootstrap ?? bootstrapPersistentRuntime;
@@ -73,6 +79,16 @@ export async function executeTelegramPollOnceCommand(input?: {
 
   if (!runtime.ok) {
     return { exitCode: 1 };
+  }
+
+  const reboundBuiltinSkills = rebindBuiltinSkills({
+    skillRegistry: runtime.state.skillRegistry,
+    config: runtime.state.config,
+    env: input?.env,
+    fetchImpl: input?.fetchImpl
+  });
+  if (reboundBuiltinSkills > 0) {
+    console.log(`Rebound built-in skills: ${reboundBuiltinSkills}`);
   }
 
   const botToken = runtime.state.config.providers.telegram?.botToken;
@@ -124,6 +140,7 @@ export async function executeTelegramPollOnceCommand(input?: {
     processedUpdates: result.processedUpdates,
     ignoredUpdates: result.ignoredUpdates,
     executedRuns: result.executedRuns,
+    deliveredReplies: result.deliveredReplies,
     successfulRuns,
     failedRuns,
     runtimeStoragePath
@@ -132,6 +149,7 @@ export async function executeTelegramPollOnceCommand(input?: {
   }
 
   return {
-    exitCode: result.skipped || failedRuns > 0 ? 1 : 0
+    exitCode: result.skipped || failedRuns > 0 ? 1 : 0,
+    nextOffset: result.nextOffset
   };
 }

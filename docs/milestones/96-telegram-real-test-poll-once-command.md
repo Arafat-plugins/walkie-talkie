@@ -24,17 +24,8 @@ The command:
 - creates a fetch-based Telegram Bot API client from saved config
 - runs one `getUpdates` polling cycle
 - routes supported updates into configured orchestration
+- sends a Telegram reply when final pipeline output contains `replyText`
 - persists updated run history back to runtime storage
-
-## Current limitation
-
-This patch does not yet auto-send a Telegram reply from final pipeline output.
-
-It is focused on:
-
-- real update ingestion
-- real orchestration handoff
-- persisted runtime evidence
 
 ## Verification
 

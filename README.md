@@ -74,11 +74,30 @@ From project root (`walkie-talkie/`):
 2. run one live polling cycle:
    - `npm run telegram:poll:once`
 
+## Telegram Quick Test (Today)
+
+From project root (`walkie-talkie/`):
+
+1. make sure config has:
+   - `providers.telegram.botToken`
+   - `providers.defaultAi.apiKey`
+2. seed a ready-to-test Telegram agent + skill + pipeline:
+   - `npm run telegram:seed:local-machine`
+3. run one real polling cycle:
+   - `npm run telegram:poll:once`
+4. or keep the bot running:
+   - `npm run telegram:poll`
+
 Current scope:
 - fetches one real Telegram `getUpdates` cycle
 - routes supported updates into runtime orchestration
+- sends Telegram replies when final output contains `replyText`
 - persists updated run history to local runtime storage
-- does not yet auto-send Telegram replies from final pipeline output
+
+Seeded Telegram flow behavior:
+- understands simple machine questions like installed/version checks
+- checks the real local machine
+- uses the default AI provider to turn facts into a more natural reply
 
 ## Production Bootstrap Boundary
 

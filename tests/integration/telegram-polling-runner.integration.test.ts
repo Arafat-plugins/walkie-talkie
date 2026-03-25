@@ -74,27 +74,38 @@ test("telegram polling runner integration: pollOnce turns updates into configure
     transport: async ({ method, payload }) => {
       transportCalls.push({ method, payload });
 
-      assert.equal(method, "getUpdates");
+      if (method === "getUpdates") {
+        return {
+          ok: true,
+          result: [
+            {
+              update_id: 1200,
+              message: {
+                message_id: 51,
+                text: "check cursor",
+                chat: { id: 8899 },
+                from: { username: "arafat" }
+              }
+            },
+            {
+              update_id: 1201,
+              callback_query: {
+                id: "ignore-me"
+              }
+            }
+          ]
+        };
+      }
 
       return {
         ok: true,
-        result: [
-          {
-            update_id: 1200,
-            message: {
-              message_id: 51,
-              text: "check cursor",
-              chat: { id: 8899 },
-              from: { username: "arafat" }
-            }
-          },
-          {
-            update_id: 1201,
-            callback_query: {
-              id: "ignore-me"
-            }
+        result: {
+          message_id: 77,
+          text: typeof payload.text === "string" ? payload.text : "handled",
+          chat: {
+            id: 8899
           }
-        ]
+        }
       };
     }
   });
@@ -149,7 +160,15 @@ test("telegram polling runner integration: pollOnce turns updates into configure
   assert.equal(result.processedUpdates, 2);
   assert.equal(result.ignoredUpdates, 1);
   assert.equal(result.executedRuns, 1);
+  assert.equal(result.deliveredReplies, 1);
   assert.deepEqual(result.processedUpdateIds, [1200, 1201]);
+  assert.deepEqual(result.deliveredMessages, [
+    {
+      messageId: 77,
+      chatId: 8899,
+      text: "Handled: check cursor"
+    }
+  ]);
   assert.equal(result.results[0]?.ok, true);
   if (result.results[0]?.ok) {
     assert.deepEqual(result.results[0].finalOutput, {
@@ -175,6 +194,14 @@ test("telegram polling runner integration: pollOnce turns updates into configure
       payload: {
         offset: 1200,
         timeout: 4
+      }
+    },
+    {
+      method: "sendMessage",
+      payload: {
+        chat_id: 8899,
+        text: "Handled: check cursor",
+        reply_to_message_id: 51
       }
     }
   ]);
@@ -237,6 +264,8 @@ test("telegram polling runner integration: disabled or non-polling runtime confi
 
   assert.equal(disabledResult.skipped, true);
   assert.match(disabledResult.reason ?? "", /disabled/);
+  assert.equal(disabledResult.deliveredReplies, 0);
   assert.equal(webhookResult.skipped, true);
   assert.match(webhookResult.reason ?? "", /requires polling mode/);
+  assert.equal(webhookResult.deliveredReplies, 0);
 });

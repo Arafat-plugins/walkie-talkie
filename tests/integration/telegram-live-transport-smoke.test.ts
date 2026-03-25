@@ -116,6 +116,14 @@ test("telegram live transport smoke: fixture getUpdates flows through client and
     ok: true;
     result: unknown[];
   }>("get-updates-response.json");
+  const deliveredFixture = readFixture<{
+    ok: true;
+    result: {
+      message_id: number;
+      text: string;
+      chat: { id: number };
+    };
+  }>("send-message-response.json");
 
   const calls: Array<{ method: string; payload: Record<string, unknown> }> = [];
   const client = createTelegramBotApiClient({
@@ -125,7 +133,7 @@ test("telegram live transport smoke: fixture getUpdates flows through client and
     transport: async ({ method, payload }) => {
       calls.push({ method, payload });
 
-      return updatesFixture;
+      return method === "getUpdates" ? updatesFixture : deliveredFixture;
     }
   });
 
@@ -148,7 +156,15 @@ test("telegram live transport smoke: fixture getUpdates flows through client and
   assert.equal(result.processedUpdates, 2);
   assert.equal(result.executedRuns, 1);
   assert.equal(result.ignoredUpdates, 1);
+  assert.equal(result.deliveredReplies, 1);
   assert.equal(result.nextOffset, 501003);
+  assert.deepEqual(result.deliveredMessages, [
+    {
+      messageId: 84,
+      chatId: 998877,
+      text: "Cursor check queued."
+    }
+  ]);
   if (result.results[0]?.ok) {
     assert.deepEqual(result.results[0].finalOutput, {
       replyText: "Cursor transport smoke: check cursor on my server"
@@ -173,6 +189,14 @@ test("telegram live transport smoke: fixture getUpdates flows through client and
       payload: {
         offset: 501001,
         timeout: 5
+      }
+    },
+    {
+      method: "sendMessage",
+      payload: {
+        chat_id: 998877,
+        text: "Cursor transport smoke: check cursor on my server",
+        reply_to_message_id: 73
       }
     }
   ]);

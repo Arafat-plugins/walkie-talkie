@@ -157,7 +157,11 @@ test("telegram poll-once command runs one live-style cycle and persists runtime 
         ];
       },
       async sendMessage() {
-        throw new Error("sendMessage should not run in poll-once command yet");
+        return {
+          messageId: 12,
+          chatId: 9988,
+          text: "Handled: check node"
+        };
       },
       async setWebhook() {
         throw new Error("setWebhook should not run in poll-once command");

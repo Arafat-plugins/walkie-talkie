@@ -8,7 +8,7 @@ import {
 } from "../../../runtime/src/index.ts";
 import type { SkillRegistryStore } from "../../../skills/src/index.ts";
 import { createTelegramAdapter, type TelegramAdapter } from "./telegram-adapter.ts";
-import type { TelegramBotApiClient } from "./telegram-bot-api.ts";
+import type { TelegramBotApiClient, TelegramDeliveredMessage } from "./telegram-bot-api.ts";
 import { createTelegramTriggerEvent } from "./telegram-trigger.ts";
 import { createTelegramRuntimeConfig } from "./telegram-runtime-config.ts";
 
@@ -26,7 +26,9 @@ export type TelegramPollingCycleResult = {
   processedUpdates: number;
   ignoredUpdates: number;
   executedRuns: number;
+  deliveredReplies: number;
   processedUpdateIds: number[];
+  deliveredMessages: TelegramDeliveredMessage[];
   results: RuntimeOrchestrationResult[];
 };
 
@@ -60,6 +62,24 @@ function buildPollingRequestTimeoutSeconds(config: WalkieTalkieConfig): number {
   return Math.max(1, Math.floor(pollingIntervalMs / 1000));
 }
 
+function extractReplyText(output: unknown): string | undefined {
+  if (!output || typeof output !== "object") {
+    return undefined;
+  }
+
+  const candidate = output as { replyText?: unknown; text?: unknown };
+
+  if (typeof candidate.replyText === "string" && candidate.replyText.trim().length > 0) {
+    return candidate.replyText.trim();
+  }
+
+  if (typeof candidate.text === "string" && candidate.text.trim().length > 0) {
+    return candidate.text.trim();
+  }
+
+  return undefined;
+}
+
 export function createTelegramPollingRunner(input: TelegramPollingRunnerInput): TelegramPollingRunner {
   const adapter = input.adapter ?? createTelegramAdapter({ delivery: { mode: "polling" } });
   const now = input.now ?? (() => new Date().toISOString());
@@ -77,7 +97,9 @@ export function createTelegramPollingRunner(input: TelegramPollingRunnerInput): 
           processedUpdates: 0,
           ignoredUpdates: 0,
           executedRuns: 0,
+          deliveredReplies: 0,
           processedUpdateIds: [],
+          deliveredMessages: [],
           results: []
         };
       }
@@ -91,7 +113,9 @@ export function createTelegramPollingRunner(input: TelegramPollingRunnerInput): 
           processedUpdates: 0,
           ignoredUpdates: 0,
           executedRuns: 0,
+          deliveredReplies: 0,
           processedUpdateIds: [],
+          deliveredMessages: [],
           results: []
         };
       }
@@ -102,6 +126,7 @@ export function createTelegramPollingRunner(input: TelegramPollingRunnerInput): 
       });
       const results: RuntimeOrchestrationResult[] = [];
       const processedUpdateIds: number[] = [];
+      const deliveredMessages: TelegramDeliveredMessage[] = [];
       let ignoredUpdates = 0;
 
       for (const update of updates) {
@@ -130,6 +155,18 @@ export function createTelegramPollingRunner(input: TelegramPollingRunnerInput): 
         });
 
         results.push(result);
+
+        const replyText = result.ok ? extractReplyText(result.finalOutput) : undefined;
+
+        if (replyText) {
+          const delivered = await input.client.sendMessage({
+            chatId: message.chatId,
+            text: replyText,
+            replyToMessageId: message.messageId
+          });
+
+          deliveredMessages.push(delivered);
+        }
       }
 
       const highestUpdateId = processedUpdateIds.reduce<number | undefined>(
@@ -144,7 +181,9 @@ export function createTelegramPollingRunner(input: TelegramPollingRunnerInput): 
         processedUpdates: updates.length,
         ignoredUpdates,
         executedRuns: results.length,
+        deliveredReplies: deliveredMessages.length,
         processedUpdateIds,
+        deliveredMessages,
         results
       };
     }
