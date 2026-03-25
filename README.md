@@ -49,6 +49,7 @@ From project root (`walkie-talkie/`):
    - `walkie-talkie onboard`
 
 `npm run install:local` will:
+- resolve the repo root from the installer script itself
 - install workspace dependencies
 - link the `walkie-talkie` binary
 - run `walkie-talkie install`
