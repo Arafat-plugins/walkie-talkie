@@ -143,3 +143,47 @@ test("createRuntimeDefaultAiProvider wires config secrets into a callable provid
     }
   });
 });
+
+test("resolveDefaultAiProviderConfig and createRuntimeDefaultAiProvider support env-backed api keys", async () => {
+  const config = createConfig();
+  config.providers.defaultAi.apiKey = "env:WALKIE_DEFAULT_AI_API_KEY";
+
+  assert.deepEqual(
+    resolveDefaultAiProviderConfig(config, {
+      WALKIE_DEFAULT_AI_API_KEY: "sk-env-provider"
+    }),
+    {
+      id: "default-ai",
+      kind: "openai-compatible",
+      baseUrl: "https://api.example.com/v1",
+      apiKey: "sk-env-provider"
+    }
+  );
+
+  const binding = createRuntimeDefaultAiProvider({
+    config,
+    env: {
+      WALKIE_DEFAULT_AI_API_KEY: "sk-env-provider"
+    },
+    fetchImpl: async () =>
+      new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: "ok"
+              }
+            }
+          ]
+        }),
+        {
+          status: 200,
+          headers: {
+            "content-type": "application/json"
+          }
+        }
+      )
+  });
+
+  assert.equal(binding.provider.config.apiKey, "sk-env-provider");
+});

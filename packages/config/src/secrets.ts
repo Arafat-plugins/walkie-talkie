@@ -1,3 +1,4 @@
+import { isEnvSecretReference, parseEnvSecretReference } from "./env-policy.ts";
 import type { WalkieTalkieConfig } from "./schema.ts";
 
 export const SECRET_CONFIG_PATHS = [
@@ -84,6 +85,12 @@ export function redactConfigSecrets(config: WalkieTalkieConfig): WalkieTalkieCon
       continue;
     }
 
+    if (isEnvSecretReference(currentValue)) {
+      const envName = parseEnvSecretReference(currentValue) ?? "UNKNOWN_ENV";
+      setNestedValue(clone, path, `[env:${envName}]`);
+      continue;
+    }
+
     setNestedValue(clone, path, maskSecretValue(currentValue));
   }
 
@@ -94,6 +101,12 @@ export function buildSecretPresenceSummary(config: WalkieTalkieConfig): Record<S
   const record = config as unknown as UnknownRecord;
 
   return Object.fromEntries(
-    SECRET_CONFIG_PATHS.map((path) => [path, typeof getNestedValue(record, path) === "string"])
+    SECRET_CONFIG_PATHS.map((path) => {
+      const value = getNestedValue(record, path);
+      return [
+        path,
+        typeof value === "string" && value.trim().length > 0 && !isEnvSecretReference(value)
+      ];
+    })
   ) as Record<SecretConfigPath, boolean>;
 }

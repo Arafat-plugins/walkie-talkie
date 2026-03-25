@@ -108,13 +108,16 @@ Core files:
 - orchestration slice
 - rendered dashboard foundation
 - logging/failure/retry/audit contracts
+- persistent storage load/save path
+- live Telegram transport boundary
+- live AI transport boundary
 
 ### Still Demo / Partial
 
-- live Telegram transport
-- real AI HTTP transport
 - fully data-driven dashboard
-- persistent entity storage
+- worker runtime execution loop
+- operator safety enforcement inside runtime
+- hosted one-line installer/distribution flow
 
 ## Current Important Docs
 
@@ -123,6 +126,8 @@ Core files:
 - `docs/architecture/04-ai-collaboration-guardrails.md`
 - `docs/architecture/05-execution-docs-framework.md`
 - `docs/architecture/06-ai-handoff-playbook.md`
+- `docs/architecture/08-release-readiness-checklist.md`
+- `docs/architecture/09-deployment-playbook.md`
 
 ## Practical Resume Shortcut
 
@@ -136,4 +141,3 @@ Answer:
 3. read latest milestone note
 4. open the package related to that step
 5. do one small verified change only
-

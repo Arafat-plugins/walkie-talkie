@@ -1,4 +1,9 @@
-import { loadConfigFile, resolveConfigPath, type WalkieTalkieConfig } from "../../config/src/index.ts";
+import {
+  loadConfigFile,
+  resolveConfigPath,
+  resolveConfigSecretsFromEnv,
+  type WalkieTalkieConfig
+} from "../../config/src/index.ts";
 import { verifyRuntimeReadiness } from "./readiness.ts";
 
 export type RuntimeBootstrapSuccess = {
@@ -34,7 +39,8 @@ export function buildRuntimeBootstrapSummary(result: RuntimeBootstrapResult): st
 
 export async function bootstrapRuntime(
   baseDirectory: string,
-  fileName?: string
+  fileName?: string,
+  env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env
 ): Promise<RuntimeBootstrapResult> {
   const configPath = resolveConfigPath(baseDirectory, fileName);
   const loaded = await loadConfigFile(configPath);
@@ -47,7 +53,8 @@ export async function bootstrapRuntime(
     };
   }
 
-  const readiness = verifyRuntimeReadiness(loaded.config);
+  const resolvedConfig = resolveConfigSecretsFromEnv(loaded.config, env);
+  const readiness = verifyRuntimeReadiness(resolvedConfig);
   if (!readiness.ready) {
     return {
       ok: false,
@@ -59,6 +66,6 @@ export async function bootstrapRuntime(
   return {
     ok: true,
     configPath,
-    config: loaded.config
+    config: resolvedConfig
   };
 }

@@ -189,3 +189,31 @@ test("bootstrapRuntime returns readiness issue when trigger-specific secret is m
     await rm(tempDir, { recursive: true, force: true });
   }
 });
+
+test("bootstrapRuntime resolves env-backed secrets before readiness checks", async () => {
+  const tempDir = mkdtempSync(join(tmpdir(), "walkie-talkie-runtime-"));
+
+  try {
+    await writeConfigFile(join(tempDir, "walkie-talkie.config.json"), {
+      ...createValidConfig(),
+      providers: {
+        defaultAi: {
+          apiKey: "env:WALKIE_DEFAULT_AI_API_KEY"
+        }
+      }
+    });
+
+    const result = await bootstrapRuntime(tempDir, undefined, {
+      WALKIE_DEFAULT_AI_API_KEY: "sk-env-runtime"
+    });
+
+    assert.equal(result.ok, true);
+    if (!result.ok) {
+      return;
+    }
+
+    assert.equal(result.config.providers.defaultAi.apiKey, "sk-env-runtime");
+  } finally {
+    await rm(tempDir, { recursive: true, force: true });
+  }
+});

@@ -79,4 +79,53 @@ Current scope:
 
 Today, the supported real install path is still:
 - `npm run install:local`
+
+## Secret Env Policy
+
+Walkie-Talkie currently supports two secret-loading paths:
+
+1. direct config value
+2. env-backed secret resolution
+
+Tracked env variables:
+- `WALKIE_DEFAULT_AI_API_KEY`
+- `WALKIE_TELEGRAM_BOT_TOKEN`
+
+You can either:
+- put the secret directly in `walkie-talkie.config.json`
+- or use an env reference such as `env:WALKIE_DEFAULT_AI_API_KEY`
+
+See the committed template:
+- `.env.example`
+
+## Release And Deployment Docs
+
+- release checklist:
+  - `docs/architecture/08-release-readiness-checklist.md`
+- deployment playbook:
+  - `docs/architecture/09-deployment-playbook.md`
+
+## Hosted Installer Boundary
+
+From project root (`walkie-talkie/`):
+
+1. print hosted installer contract:
+   - `npm run install:hosted:plan`
+2. verify hosted installer boundary wiring:
+   - `npm run install:hosted:check`
+3. print Linux/macOS shell bootstrap plan:
+   - `npm run install:hosted:shell:plan`
+4. verify Linux/macOS shell bootstrap boundary:
+   - `npm run install:hosted:shell:check`
+5. print Windows PowerShell bootstrap plan:
+   - `npm run install:hosted:windows:plan`
+6. verify Windows PowerShell bootstrap boundary:
+   - `npm run install:hosted:windows:check`
+
+Current scope:
+- hosted installer assumptions are defined
+- manifest shape is defined
+- Linux/macOS `install.sh` boundary is present
+- Windows `install.ps1` boundary is present
+- hosted release download is still pending
 # walkie-talkie

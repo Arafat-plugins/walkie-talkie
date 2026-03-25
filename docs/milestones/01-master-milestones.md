@@ -17,9 +17,9 @@ All implementation must follow this file milestone-by-milestone.
 
 - Project: Walkie-Talkie
 - Mode: Milestone-based incremental delivery
-- Current Milestone: `M20`
-- Current Step: `M20-S2`
-- Last Completed Milestone: `M18`
+- Current Milestone: `M21`
+- Current Step: `M21-S4`
+- Last Completed Milestone: `M20`
 
 ## Milestone Map
 
@@ -288,14 +288,14 @@ Done Criteria:
 
 ### M20: Productization and Operations
 
-Status: `PENDING`
+Status: `DONE`
 
 Steps:
 - [x] M20-S1 Add production install/bootstrap plan and installer script boundary. work files: `packages/core/src/production-bootstrap-plan.ts`, `packages/core/src/index.ts`, `scripts/install/production-bootstrap.ts`, `package.json`, `README.md`, `tests/unit/production-bootstrap-plan.test.ts`, `tests/integration/production-bootstrap-boundary.integration.test.ts`, `docs/milestones/87-m20-s1-production-bootstrap-boundary.md`
-- M20-S2 Add background worker/scheduler runtime contract.
-- M20-S3 Add secret management upgrade path and env loading policy.
-- M20-S4 Add operator safety controls (budgets, approvals, allowlists).
-- M20-S5 Add release-readiness checklist and deployment docs.
+- [x] M20-S2 Add background worker/scheduler runtime contract. work files: `packages/runtime/src/worker-contract.ts`, `packages/runtime/src/index.ts`, `tests/unit/worker-contract.test.ts`, `docs/milestones/88-m20-s2-worker-scheduler-contract.md`
+- [x] M20-S3 Add secret management upgrade path and env loading policy. work files: `packages/config/src/env-policy.ts`, `packages/config/src/secrets.ts`, `packages/config/src/index.ts`, `packages/runtime/src/bootstrap.ts`, `packages/runtime/src/provider-wiring.ts`, `packages/runtime/src/persistent-state.ts`, `.env.example`, `README.md`, `tests/unit/config-env-policy.test.ts`, `tests/unit/config-secrets.test.ts`, `tests/unit/runtime-bootstrap.test.ts`, `tests/unit/runtime-ai-provider.test.ts`, `docs/milestones/89-m20-s3-secret-env-policy.md`
+- [x] M20-S4 Add operator safety controls (budgets, approvals, allowlists). work files: `packages/runtime/src/operator-safety.ts`, `packages/runtime/src/index.ts`, `tests/unit/operator-safety.test.ts`, `docs/milestones/90-m20-s4-operator-safety-controls.md`
+- [x] M20-S5 Add release-readiness checklist and deployment docs. work files: `docs/architecture/08-release-readiness-checklist.md`, `docs/architecture/09-deployment-playbook.md`, `docs/architecture/07-system-map.md`, `README.md`, `docs/milestones/91-m20-s5-release-readiness-and-deployment-docs.md`
 
 Done Criteria:
 - production deployment path is documented and scaffolded
@@ -311,9 +311,9 @@ Purpose Note:
 - User wants GitHub-hosted one-line install support similar to `curl ... | bash`, without overloading the base install flow.
 
 Steps:
-- M21-S1 Define hosted installer contract and release assumptions.
-- M21-S2 Add `scripts/install.sh` for Linux/macOS bootstrap.
-- M21-S3 Add Windows installer boundary (`install.ps1` or equivalent plan).
+- [x] M21-S1 Define hosted installer contract and release assumptions. work files: `packages/core/src/hosted-installer-contract.ts`, `packages/core/src/index.ts`, `scripts/install/hosted-installer-contract.ts`, `package.json`, `README.md`, `tests/unit/hosted-installer-contract.test.ts`, `tests/integration/hosted-installer-boundary.integration.test.ts`, `docs/milestones/92-m21-s1-hosted-installer-contract.md`
+- [x] M21-S2 Add `scripts/install.sh` for Linux/macOS bootstrap. work files: `scripts/install.sh`, `package.json`, `README.md`, `tests/integration/install-shell-boundary.integration.test.ts`, `docs/milestones/93-m21-s2-install-sh-linux-macos.md`
+- [x] M21-S3 Add Windows installer boundary (`install.ps1` or equivalent plan). work files: `scripts/install.ps1`, `package.json`, `README.md`, `tests/integration/install-powershell-boundary.integration.test.ts`, `docs/milestones/94-m21-s3-windows-installer-boundary.md`
 - M21-S4 Add global CLI install/link strategy for release builds.
 - M21-S5 Add installer smoke docs, safety notes, and rollback/update guidance.
 
@@ -414,12 +414,19 @@ Done Criteria:
 - 2026-03-24: M18-S4 completed (persistent runtime bootstrap now restores config, entity state, run history, and audit data from disk-backed snapshots). work files: `packages/runtime/src/persistent-state.ts`, `packages/runtime/src/index.ts`, `packages/logging/src/audit-event.ts`, `packages/runtime/src/run-history.ts`, `packages/skills/src/skill-registry.ts`, `packages/mcp/src/mcp-registry.ts`, `tests/unit/persistent-state.test.ts`, `tests/unit/audit-event.test.ts`, `tests/unit/skill-registry.test.ts`, `tests/unit/mcp-registry.test.ts`, `docs/milestones/85-m18-s4-persistent-state-loading.md`
 - 2026-03-24: M18-S5 completed (save-and-restore persistence path now has integration coverage across config, entity state, run history, and audit data; M18 done). work files: `tests/integration/persistent-storage.integration.test.ts`, `docs/milestones/86-m18-s5-persistence-integration-tests.md`
 - 2026-03-24: M20-S1 completed (production bootstrap plan and local installer boundary script added without overloading the supported local install flow). work files: `packages/core/src/production-bootstrap-plan.ts`, `packages/core/src/index.ts`, `scripts/install/production-bootstrap.ts`, `package.json`, `README.md`, `tests/unit/production-bootstrap-plan.test.ts`, `tests/integration/production-bootstrap-boundary.integration.test.ts`, `docs/milestones/87-m20-s1-production-bootstrap-boundary.md`
+- 2026-03-24: M20-S2 completed (background worker, scheduler task, and queue job contracts added for future long-running execution paths). work files: `packages/runtime/src/worker-contract.ts`, `packages/runtime/src/index.ts`, `tests/unit/worker-contract.test.ts`, `docs/milestones/88-m20-s2-worker-scheduler-contract.md`
+- 2026-03-24: M20-S3 completed (env-backed secret resolution and `.env.example` template added for tracked secret fields, with runtime bootstrap/provider wiring support). work files: `packages/config/src/env-policy.ts`, `packages/config/src/secrets.ts`, `packages/config/src/index.ts`, `packages/runtime/src/bootstrap.ts`, `packages/runtime/src/provider-wiring.ts`, `packages/runtime/src/persistent-state.ts`, `.env.example`, `README.md`, `tests/unit/config-env-policy.test.ts`, `tests/unit/config-secrets.test.ts`, `tests/unit/runtime-bootstrap.test.ts`, `tests/unit/runtime-ai-provider.test.ts`, `docs/milestones/89-m20-s3-secret-env-policy.md`
+- 2026-03-24: M20-S4 completed (operator safety contract added for budgets, approval-required execution, and allowlist evaluation). work files: `packages/runtime/src/operator-safety.ts`, `packages/runtime/src/index.ts`, `tests/unit/operator-safety.test.ts`, `docs/milestones/90-m20-s4-operator-safety-controls.md`
+- 2026-03-24: M20-S5 completed (release-readiness checklist and deployment playbook added; M20 done). work files: `docs/architecture/08-release-readiness-checklist.md`, `docs/architecture/09-deployment-playbook.md`, `docs/architecture/07-system-map.md`, `README.md`, `docs/milestones/91-m20-s5-release-readiness-and-deployment-docs.md`
 - 2026-03-24: Added future milestone M21 for GitHub-hosted one-line installer and release distribution planning.
+- 2026-03-24: M21-S1 completed (hosted installer contract and release assumptions defined, with plan/check script boundary for later install.sh work). work files: `packages/core/src/hosted-installer-contract.ts`, `packages/core/src/index.ts`, `scripts/install/hosted-installer-contract.ts`, `package.json`, `README.md`, `tests/unit/hosted-installer-contract.test.ts`, `tests/integration/hosted-installer-boundary.integration.test.ts`, `docs/milestones/92-m21-s1-hosted-installer-contract.md`
+- 2026-03-24: M21-S2 completed (Linux/macOS `install.sh` boundary added, package scripts wired, and shell bootstrap smoke coverage added). work files: `scripts/install.sh`, `package.json`, `README.md`, `tests/integration/install-shell-boundary.integration.test.ts`, `docs/milestones/93-m21-s2-install-sh-linux-macos.md`
+- 2026-03-24: M21-S3 completed (Windows PowerShell installer boundary added, package scripts wired, and boundary smoke coverage added). work files: `scripts/install.ps1`, `package.json`, `README.md`, `tests/integration/install-powershell-boundary.integration.test.ts`, `docs/milestones/94-m21-s3-windows-installer-boundary.md`
 
 ## Current Next Tiny Step
 
 Execute only this now:
-- `M20-S2` Add background worker/scheduler runtime contract.
+- `M21-S4` Add global CLI install/link strategy for release builds.
 
 ## Resume Instruction (Use This Prompt)
 

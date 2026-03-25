@@ -2,6 +2,7 @@ import { AgentRegistryStore } from "../../agents/src/index.ts";
 import {
   loadConfigFile,
   resolveConfigPath,
+  resolveConfigSecretsFromEnv,
   type ConfigValidationIssue,
   type WalkieTalkieConfig
 } from "../../config/src/index.ts";
@@ -174,6 +175,7 @@ export async function bootstrapPersistentRuntime(
     configFileName?: string;
     entityStorageFileName?: string;
     runtimeStorageFileName?: string;
+    env?: NodeJS.ProcessEnv | Record<string, string | undefined>;
   }
 ): Promise<PersistentRuntimeBootstrapResult> {
   const configPath = resolveConfigPath(baseDirectory, options?.configFileName);
@@ -191,7 +193,8 @@ export async function bootstrapPersistentRuntime(
     };
   }
 
-  const readiness = verifyRuntimeReadiness(loadedConfig.config);
+  const resolvedConfig = resolveConfigSecretsFromEnv(loadedConfig.config, options?.env ?? process.env);
+  const readiness = verifyRuntimeReadiness(resolvedConfig);
   if (!readiness.ready) {
     return {
       ok: false,
@@ -248,7 +251,7 @@ export async function bootstrapPersistentRuntime(
     entityStoragePath,
     runtimeStoragePath,
     state: createPersistentRuntimeState({
-      config: loadedConfig.config,
+      config: resolvedConfig,
       entitySnapshot,
       runtimeSnapshot
     }),

@@ -1,4 +1,4 @@
-import type { WalkieTalkieConfig } from "../../config/src/index.ts";
+import { resolveConfigSecretsFromEnv, type WalkieTalkieConfig } from "../../config/src/index.ts";
 import {
   createFetchOpenAiCompatibleTransport,
   createOpenAiCompatibleProvider,
@@ -12,12 +12,17 @@ export type RuntimeDefaultAiProviderBinding = {
   defaultModel: string;
 };
 
-export function resolveDefaultAiProviderConfig(config: WalkieTalkieConfig): AiProviderConfig {
+export function resolveDefaultAiProviderConfig(
+  config: WalkieTalkieConfig,
+  env: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env
+): AiProviderConfig {
+  const resolvedConfig = resolveConfigSecretsFromEnv(config, env);
+
   return {
     id: "default-ai",
     kind: "openai-compatible",
-    baseUrl: config.providers.defaultAi.baseUrl,
-    apiKey: config.providers.defaultAi.apiKey
+    baseUrl: resolvedConfig.providers.defaultAi.baseUrl,
+    apiKey: resolvedConfig.providers.defaultAi.apiKey
   };
 }
 
@@ -29,8 +34,9 @@ export function createRuntimeDefaultAiProvider(input: {
   config: WalkieTalkieConfig;
   fetchImpl?: AiFetchLike;
   timeoutMs?: number;
+  env?: NodeJS.ProcessEnv | Record<string, string | undefined>;
 }): RuntimeDefaultAiProviderBinding {
-  const providerConfig = resolveDefaultAiProviderConfig(input.config);
+  const providerConfig = resolveDefaultAiProviderConfig(input.config, input.env);
   const transport = createFetchOpenAiCompatibleTransport({
     fetchImpl: input.fetchImpl,
     timeoutMs: input.timeoutMs

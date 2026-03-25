@@ -3,6 +3,7 @@ import { test } from "node:test";
 
 import {
   buildSecretPresenceSummary,
+  createEnvSecretReference,
   isSecretConfigPath,
   maskSecretValue,
   redactConfigSecrets,
@@ -74,5 +75,19 @@ test("buildSecretPresenceSummary reports false when optional secret is absent", 
   assert.deepEqual(summary, {
     "providers.defaultAi.apiKey": true,
     "providers.telegram.botToken": false
+  });
+});
+
+test("redactConfigSecrets shows env-backed secret references clearly", () => {
+  const config = createValidConfig();
+  config.providers.defaultAi.apiKey = createEnvSecretReference("OPENAI_API_KEY");
+
+  const redacted = redactConfigSecrets(config);
+  const summary = buildSecretPresenceSummary(config);
+
+  assert.equal(redacted.providers.defaultAi.apiKey, "[env:OPENAI_API_KEY]");
+  assert.deepEqual(summary, {
+    "providers.defaultAi.apiKey": false,
+    "providers.telegram.botToken": true
   });
 });
